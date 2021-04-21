@@ -1,19 +1,4 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
-
-service: LAI_NEW
-app: lai-new
-org: lai-new
+service: lai-new
 
 frameworkVersion: '2'
 
@@ -22,7 +7,7 @@ custom:
   stage: dev
   region: us-west-2
   dynamoDBTableName: ${self:custom.projectName}-${self:custom.stage}-table
-  s3BucketName: ${self:custom.projectName}-${self:custom.stage}-bucket
+  s3BucketName: ${self:custom.projectName}-${self:custom.stage}-s3-bucket
   userPoolName: ${self:custom.projectName}-${self:custom.stage}
   clientName: ${self:custom.projectName}-client
   domainName: ${self:custom.projectName}-${self:custom.stage}

@@ -1,2 +1,4 @@
 config/env.yml
 node_modules
+.serverless
+mocks
