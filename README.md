@@ -7,7 +7,7 @@
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/resend-verification-code
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/signin
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/signout
-  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/checktoken
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/check-token
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/changepassword
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/forgotpassword
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/confirm-forgotpassword

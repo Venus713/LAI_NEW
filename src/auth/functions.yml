@@ -51,10 +51,10 @@ signout:
           origin: '*'
 
 checktoken:
-  handler: src/auth/handler.checktoken
+  handler: src/auth/handler.check_token
   events:
     - http:
-        path: auth/checktoken
+        path: auth/check-token
         method: get
         cors:
           origin: '*'

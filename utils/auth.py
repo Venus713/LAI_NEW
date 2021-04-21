@@ -24,6 +24,8 @@ class Authentication:
 
         if user_resp.get('statusCode') == 200:
             user_id = json.loads(user_resp.get('body')).get('data')
+            print('===============================')
+            print(f'{user_id=}')
             user_info = self.__dynamodb.query_item(
                 self.pk, {'user_id': user_id})
             logger.info(

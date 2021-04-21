@@ -5,7 +5,7 @@ frameworkVersion: '2'
 custom:
   projectName: lai-new
   stage: dev
-  region: us-west-2
+  region: us-east-1
   dynamoDBTableName: ${self:custom.projectName}-${self:custom.stage}-table
   s3BucketName: ${self:custom.projectName}-${self:custom.stage}-s3-bucket
   userPoolName: ${self:custom.projectName}-${self:custom.stage}
@@ -30,26 +30,26 @@ provider:
     USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
     CALL_BACK_URL: ${file(config/env.yml):${self:custom.stage}.callBackUrl}
 
-iamRoleStatements:
-  - Effect: Allow
-    Action:
-      - dynamodb:DescribeTable
-      - dynamodb:Query
-      - dynamodb:Scan
-      - dynamodb:GetItem
-      - dynamodb:PutItem
-      - dynamodb:UpdateItem
-      - dynamodb:DeleteItem
-    Resource:
-      - "Fn::GetAtt": [ UserTable, Arn ]
-  - Effect: 'Allow'
-    Action:
-      - 's3:PutObject'
-      - 's3:GetObject'
-      - 's3:ListBucket'
-    Resource: 
-      - "arn:aws:s3:::${self:custom.s3BucketName}/*"
-      - "arn:aws:s3:::${self:custom.s3BucketName}"
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [ UserTable, Arn ]
+    - Effect: 'Allow'
+      Action:
+        - 's3:PutObject'
+        - 's3:GetObject'
+        - 's3:ListBucket'
+      Resource: 
+        - "arn:aws:s3:::${self:custom.s3BucketName}/*"
+        - "arn:aws:s3:::${self:custom.s3BucketName}"
 
 package:
   exclude:

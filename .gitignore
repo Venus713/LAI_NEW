@@ -1,4 +1,6 @@
 config/env.yml
 node_modules
 .serverless
-mocks
+__pycache__
+test.py
+.vscode
