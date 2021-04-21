@@ -1,0 +1,54 @@
+Resources:
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      # Generate a name based on the stage
+      UserPoolName: ${self:custom.userPoolName}
+      # Set email as an alias
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: "OFF"
+      # VerificationMessageTemplate:
+      #   DefaultEmailOption: "CONFIRM_WITH_LINK"
+        # EmailMessageByLink: "Please click on the following link to verify: {##Verify Email##}"
+        # EmailSubjectByLink: "Please confirm your registration"
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: ${self:custom.clientName}
+      UserPoolId:
+        Ref: CognitoUserPool
+      ExplicitAuthFlows:
+        - ADMIN_NO_SRP_AUTH
+        - USER_PASSWORD_AUTH
+      GenerateSecret: false
+
+      # CallbackURLs: 
+      #   - ${self:provider.environment.CALL_BACK_URL}
+
+      SupportedIdentityProviders: 
+        - COGNITO
+
+  CognitoUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: ${self:custom.domainName}
+      UserPoolId: 
+        Ref: CognitoUserPool
+
+# Print out the Id of the User Pool that is created
+Outputs:
+  UserPoolId:
+    Value:
+      Ref: CognitoUserPool
+    Export:
+      Name: ${self:provider.stage}-UserPoolId
+
+  UserPoolClientId:
+    Value:
+      Ref: CognitoUserPoolClient
+    Export:
+      Name: ${self:provider.stage}-UserPoolClientId

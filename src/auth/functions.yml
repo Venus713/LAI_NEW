@@ -1,0 +1,132 @@
+signup:
+  handler: src/auth/handler.signup
+  events:
+    - http:
+        path: auth/signup
+        method: post
+        cors:
+          origin: '*'
+custom_message:
+  handler: src/auth/handler.custom_message
+  events:
+    - cognitoUserPool:
+        pool: ${self:custom.userPoolName}
+        trigger: CustomMessage
+        existing: true
+
+confirmsignup:
+  handler: src/auth/handler.confirm_signup
+  events:
+    - http:
+        path: auth/confirmsignup
+        method: post
+        cors:
+          origin: '*'
+
+resend_verification_code:
+  handler: src/auth/handler.resend_verification_code
+  events:
+    - http:
+        path: auth/resend-verification-code
+        method: post
+        cors:
+          origin: '*'
+
+signin:
+  handler: src/auth/handler.signin
+  events:
+    - http:
+        path: auth/signin
+        method: post
+        cors:
+          origin: '*'
+
+signout:
+  handler: src/auth/handler.signout
+  events:
+    - http:
+        path: auth/signout
+        method: post
+        cors:
+          origin: '*'
+
+checktoken:
+  handler: src/auth/handler.checktoken
+  events:
+    - http:
+        path: auth/checktoken
+        method: get
+        cors:
+          origin: '*'
+
+change_password:
+  handler: src/auth/handler.changepassword
+  events:
+    - http:
+        path: auth/changepassword
+        method: post
+        cors:
+          origin: '*'
+
+forgot_password:
+  handler: src/auth/handler.forgotpassword
+  events:
+    - http:
+        path: auth/forgotpassword
+        method: post
+        cors:
+          origin: '*'
+
+confirm_forgotpassword:
+  handler: src/auth/handler.confirm_forgotpassword
+  events:
+    - http:
+        path: auth/confirm-forgotpassword
+        method: post
+        cors:
+          origin: '*'
+
+userlist:
+  handler: src/auth/handler.userlist
+  events:
+    - http:
+        path: auth/users
+        method: get
+        cors:
+          origin: '*'
+
+retrieve_user:
+  handler: src/auth/handler.retrieve_user
+  events:
+    - http:
+        path: auth/users/{id}
+        method: get
+        cors:
+          origin: '*'
+
+update_user:
+  handler: src/auth/handler.update_user
+  events:
+    - http:
+        path: auth/users/{id}
+        method: put
+        cors:
+          origin: '*'
+
+delete_user:
+  handler: src/auth/handler.delete_user
+  events:
+    - http:
+        path: auth/users/{id}
+        method: delete
+        cors:
+          origin: '*'
+
+enable_user:
+  handler: src/auth/handler.enable_user
+  events:
+    - http:
+        path: auth/users/{id}
+        method: post
+        cors:
+          origin: '*'

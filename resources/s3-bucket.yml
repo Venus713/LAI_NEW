@@ -1,0 +1,40 @@
+Resources:
+  AttachmentsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${self:custom.s3BucketName}
+      # Set the CORS policy
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins:
+              - '*'
+            AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            MaxAge: 3000
+  
+  # AttachmentsBucketAllowPublicReadPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket: !Ref AttachmentsBucket
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement: 
+  #         - Effect: Allow
+  #           Action: 
+  #             - "s3:GetObject"
+  #           Resource: 
+  #             - "arn:aws:s3:::${self:custom.s3BucketName}/*"
+  #           Principal: "*"
+
+# Print out the name of the bucket that is created
+Outputs:
+  AttachmentsBucketName:
+    Value:
+      Ref: AttachmentsBucket
