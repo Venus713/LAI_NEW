@@ -14,11 +14,20 @@ custom_message:
         trigger: CustomMessage
         existing: true
 
-confirmsignup:
+confirm_signup:
   handler: src/auth/handler.confirm_signup
   events:
     - http:
-        path: auth/confirmsignup
+        path: auth/confirm-signup
+        method: post
+        cors:
+          origin: '*'
+
+confirm_facebook:
+  handler: src/auth/handler.confirm_facebook
+  events:
+    - http:
+        path: auth/confirm-fb
         method: post
         cors:
           origin: '*'

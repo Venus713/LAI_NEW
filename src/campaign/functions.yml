@@ -1,0 +1,62 @@
+campain_list:
+  handler: src/campaign/handler.campaign_list
+  events:
+    - http:
+        path: campaings/
+        method: get
+        cors:
+          origin: '*'
+
+retrieve_campaign:
+  handler: src/campaign/handler.retrieve_campaign
+  events:
+    - http:
+        path: campaigns/{id}
+        method: get
+        cors:
+          origin: '*'
+
+search_campaign:
+  handler: src/campaign/handler.search_campaign
+  events:
+    - http:
+        path: campaigns/search/{key}
+        method: get
+        cors:
+          origin: '*'
+
+update_campaign:
+  handler: src/campaign/handler.update_campaign
+  events:
+    - http:
+        path: campaigns/{id}
+        method: put
+        cors:
+          origin: '*'
+
+delete_campaign:
+  handler: src/campaign/handler.delete_campaign
+  events:
+    - http:
+        path: campaigns/{id}
+        method: delete
+        cors:
+          origin: '*'
+
+campaign_from_facebook:
+  handler: campaign/handler.campaign_from_facebook
+  events:
+    - http:
+        path: campaigns/fb
+        method: get
+        cors:
+          origin: '*'
+
+campaign_performance:
+  handler: campaign/handler.campaign_performance
+  events:
+    - http:
+        path: campaigns/graph
+        method: get
+        cors:
+          origin: '*'

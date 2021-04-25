@@ -4,6 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+facebook-business = "*"
+flake8 = "*"
 
 [dev-packages]
 boto3 = "*"

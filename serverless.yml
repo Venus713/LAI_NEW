@@ -28,6 +28,8 @@ provider:
     APP_REGION: ${self:custom.region}
     USER_POOL_ID: !Ref CognitoUserPool
     USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
+    APP_ID: ${file(config/env.yml):${self:custom.stage}.appId}
+    APP_SECRET: ${file(config/env.yml):${self:custom.stage}.appSecret}
     CALL_BACK_URL: ${file(config/env.yml):${self:custom.stage}.callBackUrl}
 
   iamRoleStatements:

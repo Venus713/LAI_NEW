@@ -10,6 +10,7 @@ from utils.s3 import S3Client
 from utils.dynamodb import DynamoDb
 from utils.auth import Authentication
 from utils.response import Response
+from utils.facebook import FacebookAPI
 
 pk = 'User'
 user_roles = ('customer', 'admin',)
@@ -20,6 +21,7 @@ s3_client: S3Client = S3Client()
 client: DynamoDb = DynamoDb()
 auth: Authentication = Authentication()
 response: Response = Response()
+fb_api: FacebookAPI = FacebookAPI()
 
 
 def signup(event, context):
@@ -100,8 +102,62 @@ def confirm_signup(event, context):
             'confirm_status': True,
             'last_modified_date': str(datetime.datetime.now())
         }
-        client.update_item(pk, user_id, item)
+        resp = client.update_item(pk, user_id, item)
+        logger.info(f'update_item response in confirm_signup: {resp}')
     return confirm_signup_resp
+
+
+def confirm_facebook(event, context):
+    '''
+    handler for user facebook auth
+    '''
+    lambda_name: str = 'confirm_fb'
+
+    logger.info(
+        f'Received event in confirm_fb: {json.dumps(event, indent=2)}')
+    
+    body = json.loads(event['body'])
+    body_required_field = ('user_id', 'fb_access_token',)
+
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+    user_id = resp['user_id']
+    fb_access_token = resp['fb_access_token']
+
+    # ====== check if user_id deos exist in db ====== #
+    user_info = client.get_item(pk, user_id)
+    logger.info(f'response of user_retrieve in confirm_fb: {user_info}')
+    if not user_info:
+        return response.not_found_exception_response('user_id')
+
+    account_list = fb_api.get_account_name_list(fb_access_token)
+    logger.info(f'account_list in confirm_fb: {account_list}')
+
+    for account in account_list:
+        account_id = int(account[1])
+        account_name = account[0].replace("'","")
+
+        user_fb_info = {
+            'fb_access_token': fb_access_token,
+            'fb_page_id': '',
+            'fb_instagram_id': '',
+            'fb_pixel_id': '',
+            'fb_app_id': '',
+            'fb_account_id': account_id,
+            'name': account_name,
+            'account_type': 'facebook',
+            'credit_plan': '',
+            'spend_credits_left': 0,
+            'is_onboarding_complete': True
+        }
+        user_info.update(user_fb_info)
+        resp = client.update_item(pk, user_id, user_info)
+        logger.info(f'update_item response in confirm_fb: {resp}')
+
+    return response.handler_response(
+        200, body, 'Successfully completed facebook auth!')
 
 
 def resend_verification_code(event, context):
@@ -117,7 +173,7 @@ def resend_verification_code(event, context):
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
     if res is False:
-        return resp
+        return response
     email = resp['email']
 
     resend_code_resp = cognito.resend_verification_code(email)
@@ -150,10 +206,9 @@ def signin(event, context):
         attr_body = {
             'last_modified_date': str(datetime.datetime.now())
         }
-
-        user_resp = client.update_item(pk, email, attr_body)
+        user_id = rsr_resp[0]['user_id']
+        user_resp = client.update_item(pk, user_id, attr_body)
         logger.info(f'update_item response in sign_in: {user_resp}')
-        return signin_resp
 
     return signin_resp
 
@@ -357,9 +412,9 @@ def update_user(event, context):
     if auth_res is False:
         return response.auth_failed_response()
 
-    available_field = ('first_name', 'last_name', 'link_key',
-        'plan', 'role', 'max_ads', 'current_ads', 'onboarding_complete',
-        'strip_id', 'column16')
+    available_field = ('real_name', 'is_paid', 'is_onboard_complete',
+        'plan', 'role', 'max_ads', 'current_ads', 'company_name', 'company_url',
+        'company_industry', 'company_role', 'strip_id',)
 
     body = json.loads(event['body'])
     for key, val in body.items():
