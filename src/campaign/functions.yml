@@ -1,3 +1,12 @@
+create_campain:
+  handler: src/campaign/handler.create_campain
+  events:
+    - http:
+        path: campaings/
+        method: post
+        cors:
+          origin: '*'
+
 campain_list:
   handler: src/campaign/handler.campaign_list
   events:
@@ -57,6 +66,42 @@ campaign_performance:
   events:
     - http:
         path: campaigns/graph
+        method: get
+        cors:
+          origin: '*'
+
+get_selectable_events:
+  handler: src/campaign/handler.get_selectable_events
+  events:
+    - http:
+        path: campaings/get_selectable_events/
+        method: get
+        cors:
+          origin: '*'
+
+account_pixels:
+  handler: src/campaign/handler.account_pixels
+  events:
+    - http:
+        path: campaings/account_pixels/
+        method: get
+        cors:
+          origin: '*'
+
+get_page_list:
+  handler: src/campaign/handler.get_page_list
+  events:
+    - http:
+        path: campaings/get_page_list/
+        method: get
+        cors:
+          origin: '*'
+
+active_audiences:
+  handler: src/campaign/handler.active_audiences
+  events:
+    - http:
+        path: campaings/active_audiences/
         method: get
         cors:
           origin: '*'

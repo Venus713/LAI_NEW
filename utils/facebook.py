@@ -31,23 +31,43 @@ class FacebookAPI:
 
         try:
             accounts = User(
-                fbid='me',api=api).get_ad_accounts(fields=['name','id'])
+                fbid='me', api=api).get_ad_accounts(fields=['name', 'id'])
 
-            if len(accounts)>0:
+            if len(accounts) > 0:
                 account_list = [(
                     account['name'],
                     account['id'][4:]
                 ) for account in accounts]
                 accounts_sorted = sorted(
                     account_list,
-                    key=lambda account:account[0]
+                    key=lambda account: account[0]
                 )
             else:
-                accounts_sorted = [('',0)]
+                accounts_sorted = [('', 0)]
 
             return accounts_sorted
         except Exception as e:
             logger.error(
                 f'Raised error in get_account_name_list: {e}'
+            )
+            raise Exception("Can't connect to Facebook account")
+
+    def get_page_list(self, token):
+        api = self.get_facebook_api(token)
+        try:
+            pages = User(
+                fbid='me', api=api).get_accounts(fields=['name', 'id'])
+            page_list = [
+                (page['name'], page['id']) for page in pages if 'name' in page
+            ]
+            if page_list:
+                pages_sorted = sorted(page_list, key=lambda page: page[0])
+            else:
+                pages_sorted = [('', 0)]
+
+            return pages_sorted
+        except Exception as e:
+            logger.error(
+                f'Raised error in get_page_list: {e}'
             )
             raise Exception("Can't connect to Facebook account")

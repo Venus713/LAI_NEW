@@ -136,25 +136,32 @@ def confirm_facebook(event, context):
     logger.info(f'account_list in confirm_fb: {account_list}')
 
     for account in account_list:
-        account_id = int(account[1])
-        account_name = account[0].replace("'","")
+        fb_account_id = int(account[1])
+        fb_account_name = account[0].replace("'", "")
 
         user_fb_info = {
+            'user_email': user_info['email'],
             'fb_access_token': fb_access_token,
             'fb_page_id': '',
             'fb_instagram_id': '',
             'fb_pixel_id': '',
             'fb_app_id': '',
-            'fb_account_id': account_id,
-            'name': account_name,
+            'fb_account_id': fb_account_id,
+            'name': fb_account_name,
             'account_type': 'facebook',
             'credit_plan': '',
-            'spend_credits_left': 0,
-            'is_onboarding_complete': True
+            'spend_credits_left': 0
         }
-        user_info.update(user_fb_info)
-        resp = client.update_item(pk, user_id, user_info)
-        logger.info(f'update_item response in confirm_fb: {resp}')
+        client.create_item('User-' + user_id, fb_account_id, user_fb_info)
+        client.create_item('FB-' + fb_account_id, user_id, {
+            'user_email': user_info['email']
+        })
+
+    user_info.update({
+        'is_onboarding_complete': True
+    })
+    resp = client.update_item(pk, user_id, user_info)
+    logger.info(f'update_item response in confirm_fb: {resp}')
 
     return response.handler_response(
         200, body, 'Successfully completed facebook auth!')
@@ -206,7 +213,7 @@ def signin(event, context):
         attr_body = {
             'last_modified_date': str(datetime.datetime.now())
         }
-        user_id = rsr_resp[0]['user_id']
+        user_id = usr_resp[0]['user_id']
         user_resp = client.update_item(pk, user_id, attr_body)
         logger.info(f'update_item response in sign_in: {user_resp}')
 
