@@ -1,9 +1,11 @@
 from dateutil.parser import parse
+from decimal import Decimal
 
 from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adspixel import AdsPixel
-from facebook_business.adobjects.user import User
+from facebook_business.adobjects.customaudience import CustomAudience
+from facebook_business.exceptions import FacebookRequestError
 
 from utils.logging import logger
 from utils.event_parser import EventParser
@@ -365,3 +367,39 @@ def fb_get_active_audiences(account_id, ids=True):
         else:
             custom_audience_names.append(audience['name'])
     return custom_audience_names
+
+
+def fb_make_lookalikes(account_id, audience_id, country):
+    try:
+        account = AdAccount('act_'+str(account_id))
+        audience_list = []
+
+        for i in [1, 2, 5]:
+            lookalike = account.create_custom_audience(
+                params={
+                    'name': f'{audience_id}-{i}',
+                    'subtype': CustomAudience.Subtype.lookalike,
+                    'origin_audience_id': audience_id,
+                    'lookalike_spec': {
+                        'origin_audience_id': audience_id,
+                        'ratio': float(Decimal(i)/(100)),
+                        'country': country,
+                    },
+                })
+            logger.info(
+                "Created lookalike audience with ratio" +
+                " %.2f: %s" % (float(Decimal(i) / 100), lookalike['id'])
+            )
+
+            audience_list.append(lookalike['id'])
+
+        return audience_list
+
+    except FacebookRequestError as e:
+        raise Exception(e.api_error_message())
+    except Exception as e:
+        logger.error(f'exception in fb_make_lookalikes: {e}')
+        raise Exception(
+            "Sorry, looks like something went wrong. "
+            "Please message support for help."
+        )

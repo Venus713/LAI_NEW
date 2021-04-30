@@ -52,26 +52,26 @@ delete_campaign:
         cors:
           origin: '*'
 
-campaign_from_facebook:
-  handler: campaign/handler.campaign_from_facebook
-  events:
-    - http:
-        path: campaigns/fb
-        method: get
-        cors:
-          origin: '*'
+# campaign_from_facebook:
+#   handler: campaign/handler.campaign_from_facebook
+#   events:
+#     - http:
+#         path: campaigns/fb
+#         method: get
+#         cors:
+#           origin: '*'
 
-campaign_performance:
-  handler: campaign/handler.campaign_performance
-  events:
-    - http:
-        path: campaigns/graph
-        method: get
-        cors:
-          origin: '*'
+# campaign_performance:
+#   handler: campaign/handler.campaign_performance
+#   events:
+#     - http:
+#         path: campaigns/graph
+#         method: get
+#         cors:
+#           origin: '*'
 
 get_selectable_events:
-  handler: src/campaign/handler.get_selectable_events
+  handler: src/campaign/handler.get_selectable_events_handler
   events:
     - http:
         path: campaings/get_selectable_events/
@@ -80,7 +80,7 @@ get_selectable_events:
           origin: '*'
 
 account_pixels:
-  handler: src/campaign/handler.account_pixels
+  handler: src/campaign/handler.account_pixels_handler
   events:
     - http:
         path: campaings/account_pixels/
@@ -89,10 +89,19 @@ account_pixels:
           origin: '*'
 
 get_page_list:
-  handler: src/campaign/handler.get_page_list
+  handler: src/campaign/handler.get_page_list_handler
   events:
     - http:
         path: campaings/get_page_list/
+        method: get
+        cors:
+          origin: '*'
+
+account_mobile_apps:
+  handler: src/campaign/handler.account_mobile_apps_handler
+  events:
+    - http:
+        path: campaings/account_mobile_apps/
         method: get
         cors:
           origin: '*'

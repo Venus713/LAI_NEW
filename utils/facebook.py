@@ -11,7 +11,7 @@ class FacebookAPI:
     def __init__(self):
         self.app_id = os.environ.get('APP_ID')
         self.app_secret = os.environ.get('APP_SECRET')
-    
+
     def get_facebook_api(self, fb_access_token):
         try:
             return FacebookAdsApi.init(

@@ -15,7 +15,8 @@ from .helpers import (
     accounts_get_selectable_events,
     get_account_pixels,
     get_account_mobile_apps,
-    fb_get_active_audiences
+    fb_get_active_audiences,
+    fb_make_lookalikes
 )
 
 pk = 'Campaign'
@@ -27,7 +28,7 @@ response: Response = Response()
 fb_api: FacebookAPI = FacebookAPI()
 
 
-def get_selectable_events(event, context):
+def get_selectable_events_handler(event, context):
     '''
     Lambda handler to get accounts_get_selectable_events
     '''
@@ -49,7 +50,7 @@ def get_selectable_events(event, context):
         200, data, 'Successfully get the accounts_get_selectable_events')
 
 
-def account_pixels(event, context):
+def account_pixels_handler(event, context):
     '''
     Lambda handler to get the account_pixels
     '''
@@ -70,7 +71,7 @@ def account_pixels(event, context):
         200, data, 'Success in account_pixels')
 
 
-def account_mobile_apps(event, context):
+def account_mobile_apps_handler(event, context):
     '''
     Lambda handler to get the account_mobile_apps
     '''
@@ -91,7 +92,7 @@ def account_mobile_apps(event, context):
         200, data, 'Success in account_mobile_apps')
 
 
-def get_page_list(event, context):
+def get_page_list_handler(event, context):
     '''
     Lambda handler to get the get_page_list
     '''
@@ -112,7 +113,7 @@ def get_page_list(event, context):
         200, data, 'Success in get_page_list')
 
 
-def active_audiences(event, context):
+def active_audiences_handler(event, context):
     '''
     Lambda handler to get the active_audiences
     '''
@@ -131,6 +132,34 @@ def active_audiences(event, context):
     data = fb_get_active_audiences(fb_account_id)
     return response.handler_response(
         200, data, 'Success in active_audiences')
+
+
+def fb_make_lookalikes_handler(event, context):
+    '''
+    Lambda handler to get the fb_make_lookalikes
+    '''
+    lambda_name: str = 'fb_make_lookalikes'
+    logger.info(
+        'Received event in fb_make_lookalikes: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    user_info = client.get_item('User', user_id)
+    fb_account_id = user_info.get('fb_account_id')
+
+    body_required_field = ('audience_id', 'country',)
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    data = fb_make_lookalikes(
+        fb_account_id, res['audience_id'], res['country'])
+    return response.handler_response(
+        200, data, 'Success in fb_make_lookalikes')
 
 
 def create_campain(event, context):
@@ -226,3 +255,36 @@ def campaign_list(event, context):
 
     return response.handler_response(
         200, campaign_data, 'Successfully get the campaign_list')
+
+
+def delete_campaign(event, context):
+    '''
+    Lambda handler to delete the campaigns
+    '''
+    lambda_name: str = 'delete_campaign'
+    logger.info(
+        'Received event in delete_campaign: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    user_info = client.get_item('User', user_id)
+    fb_access_token = user_info.get('fb_access_token')
+
+    campaign_id = event['pathParameters']['id']
+
+    api = fb_api.get_facebook_api(fb_access_token)
+    campaign = Campaign(campaign_id, api=api)
+    campaign.api_update(params={'status': 'DELETED'})
+    client.delete_item(pk, campaign_id)
+    campaign_contains_ads = client.query_item(
+        'Campaign_Ad',
+        {'campaign_id': campaign_id}
+    )
+    for c in campaign_contains_ads:
+        client.delete_item('Campaign_Ad', 'campaign_id', c.get('campaign_id'))
+
+    return response.handler_response(
+        200, None, 'Successfully deleted')

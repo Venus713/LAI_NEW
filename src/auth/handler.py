@@ -115,7 +115,7 @@ def confirm_facebook(event, context):
 
     logger.info(
         f'Received event in confirm_fb: {json.dumps(event, indent=2)}')
-    
+
     body = json.loads(event['body'])
     body_required_field = ('user_id', 'fb_access_token',)
 
@@ -419,9 +419,11 @@ def update_user(event, context):
     if auth_res is False:
         return response.auth_failed_response()
 
-    available_field = ('real_name', 'is_paid', 'is_onboard_complete',
-        'plan', 'role', 'max_ads', 'current_ads', 'company_name', 'company_url',
-        'company_industry', 'company_role', 'strip_id',)
+    # available_field = (
+    #     'real_name', 'is_paid', 'is_onboard_complete',
+    #     'plan', 'role', 'max_ads', 'current_ads', 'company_name',
+    #     'company_url', 'company_industry', 'company_role', 'strip_id',
+    # )
 
     body = json.loads(event['body'])
     for key, val in body.items():
@@ -488,6 +490,8 @@ def delete_user(event, context):
         'Received event in deleting a user: ' +
         f'{json.dumps(event, indent=2)}')
 
+    body = json.loads(event['body'])
+
     req_id = event['pathParameters']['id']
 
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
@@ -501,9 +505,9 @@ def delete_user(event, context):
                 'is_disabled': True,
                 'last_modified_date': str(datetime.datetime.now())
             }
-            resp.update(attr_resp)
+            body.update(attr_resp)
 
-            resp = client.update_item(pk, req_id, resp)
+            resp = client.update_item(pk, req_id, body)
             logger.info(f'response in deleting a user: {resp}')
             return disable_res
         return disable_res
@@ -522,6 +526,8 @@ def enable_user(event, context):
         'Received event in enable a user: ' +
         f'{json.dumps(event, indent=2)}')
 
+    body = json.loads(event['body'])
+
     req_id = event['pathParameters']['id']
 
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
@@ -535,9 +541,9 @@ def enable_user(event, context):
                 'is_disabled': False,
                 'last_modified_date': str(datetime.datetime.now())
             }
-            resp.update(attr_resp)
+            body.update(attr_resp)
 
-            resp = client.update_item(pk, req_id, resp)
+            resp = client.update_item(pk, req_id, body)
             logger.info(f'response in enable a user: {resp}')
             return enable_res
         return enable_res
