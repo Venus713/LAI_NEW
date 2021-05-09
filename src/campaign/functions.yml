@@ -107,10 +107,37 @@ account_mobile_apps:
           origin: '*'
 
 active_audiences:
-  handler: src/campaign/handler.active_audiences
+  handler: src/campaign/handler.active_audiences_handler
   events:
     - http:
         path: campaings/active_audiences/
         method: get
+        cors:
+          origin: '*'
+
+fb_make_lookalikes:
+  handler: src/campaign/handler.fb_make_lookalikes_handler
+  events:
+    - http:
+        path: campaings/fb_make_lookalikes/
+        method: get
+        cors:
+          origin: '*'
+
+create_fb_targeting_simple:
+  handler: src/campaign/handler.create_fb_targeting_simple_handler
+  events:
+    - http:
+        path: campaings/create_fb_targeting_simple/
+        method: post
+        cors:
+          origin: '*'
+
+import_campaign:
+  handler: src/campaign/handler.import_campaign_handler
+  events:
+    - http:
+        path: campaings/import_campaign/
+        method: post
         cors:
           origin: '*'

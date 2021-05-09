@@ -1,3 +1,4 @@
+import uuid
 from dateutil.parser import parse
 from decimal import Decimal
 
@@ -6,6 +7,8 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adspixel import AdsPixel
 from facebook_business.adobjects.customaudience import CustomAudience
 from facebook_business.exceptions import FacebookRequestError
+from facebook_business.adobjects.ad import Ad
+from collections import defaultdict
 
 from utils.logging import logger
 from utils.event_parser import EventParser
@@ -403,3 +406,87 @@ def fb_make_lookalikes(account_id, audience_id, country):
             "Sorry, looks like something went wrong. "
             "Please message support for help."
         )
+
+
+def get_json_error_message(e):
+    msg = ''
+    if 'error' in e and 'error_user_msg' in e['error']:
+        msg = e['error']['error_user_msg']
+    else:
+        msg = e['error']['message']
+    return msg
+
+
+def build_campaign_ownership_tree(api, fb_account_id):
+    tree = defaultdict(set)
+    campaigns = client.query_item(pk, {'fb_account_id': fb_account_id})
+    for cp in campaigns:
+        cpa = Campaign(cp.get('campaign_id'), api=api)
+        for ad in cpa.get_ads(
+            fields=['creative'], params={'limit': 100}
+        ):
+            tree[cp.get('campaign_id')].add(int(ad['creative']['id']))
+    return dict(tree)
+
+
+def import_ad_helper(
+    api,
+    ad=None,
+    ad_id=None,
+    fb_account_id=None,
+    fb_access_token=None,
+    campaign_ownership_tree=None
+):
+    if ad is None:
+        ad = Ad(ad_id, api=api)
+        ad.api_get(
+            fields=[
+                'name', 'status', 'created_time', 'campaign_id', 'creative']
+        )
+
+    canonical_id = int(ad['creative']['id'])
+    campaign_id = int(ad['campaign_id'])
+
+    preview = next(
+        ad.get_previews(params={'ad_format': 'DESKTOP_FEED_STANDARD'})
+    )['body']
+
+    is_enabled = ad['status'] == 'ACTIVE'
+
+    # Add the ad
+    ad_data = {
+        'ad_id': canonical_id,
+        'fb_account_id': fb_account_id,
+        'ad_name': ad.get('name'),
+        'enabled': is_enabled,
+        'created_at': ad.get('created_time'),
+        'preview': preview
+    }
+    client.create_item('Ads', canonical_id, ad_data)
+
+    campaign_ad_data = {
+        'campaign_id': campaign_id,
+        'ad_id': canonical_id
+    }
+    client.create_item('Campaign-Ad', str(uuid.uuid4()), campaign_ad_data)
+
+    if campaign_ownership_tree is None:
+        campaign_ownership_tree = build_campaign_ownership_tree(
+            api, fb_account_id)
+
+    for (
+        other_campaign_id,
+        creative_ids
+    ) in campaign_ownership_tree.items():
+        if canonical_id in creative_ids:
+            logger.info(
+                f'Also adding this ad to campaign {other_campaign_id}')
+
+            campaign_ad_data = {
+                'campaign_id': other_campaign_id,
+                'ad_id': canonical_id
+            }
+            client.create_item(
+                'Campaign-Ad', str(uuid.uuid4()), campaign_ad_data)
+
+    return canonical_id

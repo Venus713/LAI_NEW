@@ -103,7 +103,7 @@ class Response:
             None,
             'Incorrect username or password'
         )
-    
+
     def exist_exception_response(self, key: str) -> dict:
         logger.error(
             Exception(
@@ -386,4 +386,16 @@ class Response:
             200,
             None,
             'Successfully registered'
+        )
+
+    def fb_exception_response(self, e: Any) -> dict:
+        logger.error(
+            Exception(
+                f'FacebookRequestError: {e.__str__()}'
+            )
+        )
+        return self.build_response(
+            400,
+            None,
+            f'FacebookRequestError: {e.__str__()}'
         )
