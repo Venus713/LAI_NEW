@@ -6,6 +6,7 @@ custom:
   projectName: lai-new
   stage: dev
   region: us-east-1
+  queueName: AsyncTaskSQS.fifo
   dynamoDBTableName: ${self:custom.projectName}-${self:custom.stage}-table
   s3BucketName: ${self:custom.projectName}-${self:custom.stage}-s3-bucket
   userPoolName: ${self:custom.projectName}-${self:custom.stage}
@@ -31,6 +32,7 @@ provider:
     APP_ID: ${file(config/env.yml):${self:custom.stage}.appId}
     APP_SECRET: ${file(config/env.yml):${self:custom.stage}.appSecret}
     CALL_BACK_URL: ${file(config/env.yml):${self:custom.stage}.callBackUrl}
+    STRIPE_KEY: ${file(config/env.yml):${self:custom.stage}.stripeKey}
 
   iamRoleStatements:
     - Effect: Allow
@@ -52,6 +54,11 @@ provider:
       Resource: 
         - "arn:aws:s3:::${self:custom.s3BucketName}/*"
         - "arn:aws:s3:::${self:custom.s3BucketName}"
+    - Effect: "Allow"
+          Action:
+            - "sqs:SendMessage"
+          Resource:
+            Fn::GetAtt: [ SQSQueue, Arn ]
 
 package:
   exclude:
@@ -112,3 +119,4 @@ resources:
   - ${file(resources/cognito-user-pool.yml)}
   - ${file(resources/cognito-identity-pool.yml)}
   - ${file(resources/s3-bucket.yml)}
+  - ${file(resources/sqs.yml)}

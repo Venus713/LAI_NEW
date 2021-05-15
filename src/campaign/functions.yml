@@ -141,3 +141,22 @@ import_campaign:
         method: post
         cors:
           origin: '*'
+
+edit_fields:
+  handler: src/campaign/handler.edit_fields_handler
+  events:
+    - http:
+        path: campaings/edit_fields/
+        method: post
+        cors:
+          origin: '*'
+  environment:
+      SQS_URL:
+        Ref: SQSQueue
+
+execute_async_task:
+    handler: src.handler.execute_async_task
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [ SQSQueue, Arn ]

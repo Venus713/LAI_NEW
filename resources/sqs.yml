@@ -1,0 +1,7 @@
+Resources:
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:custom.queueName}
+      ContentBasedDeduplication: true
+      FifoQueue: true

@@ -152,13 +152,12 @@ def confirm_facebook(event, context):
             'credit_plan': '',
             'spend_credits_left': 0
         }
-        client.create_item('User-' + user_id, fb_account_id, user_fb_info)
-        client.create_item('FB-' + fb_account_id, user_id, {
-            'user_email': user_info['email']
-        })
+        sk = str(fb_account_id) + '-' + str(user_id)
+        client.create_item('FB_Account', sk, user_fb_info)
 
     user_info.update({
-        'is_onboarding_complete': True
+        'is_onboarding_complete': True,
+        'fb_access_token': fb_access_token
     })
     resp = client.update_item(pk, user_id, user_info)
     logger.info(f'update_item response in confirm_fb: {resp}')

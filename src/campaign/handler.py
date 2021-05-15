@@ -1,5 +1,6 @@
 import json
 import datetime
+import traceback
 from decimal import Decimal
 
 from facebook_business.adobjects.campaign import Campaign
@@ -7,6 +8,7 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
 from facebook_business.adobjects.targetingsearch import TargetingSearch
 from facebook_business.adobjects.adset import AdSet
+from facebook_business.adobjects.page import Page
 
 from utils.logging import logger
 from utils.event_parser import EventParser
@@ -16,6 +18,7 @@ from utils.response import Response
 from utils.facebook import FacebookAPI
 from utils.batch import Batch
 from utils.event import get_promoted_object
+from utils.stripe import Stripe
 from .helpers import (
     get_campaign,
     accounts_get_selectable_events,
@@ -25,7 +28,10 @@ from .helpers import (
     fb_make_lookalikes,
     get_json_error_message,
     import_ad_helper,
-    build_campaign_ownership_tree
+    build_campaign_ownership_tree,
+    notify,
+    make_request,
+    start_async_task
 )
 
 pk = 'Campaign'
@@ -35,6 +41,7 @@ client: DynamoDb = DynamoDb()
 auth: Authentication = Authentication()
 response: Response = Response()
 fb_api: FacebookAPI = FacebookAPI()
+stripe: Stripe = Stripe()
 
 
 def get_selectable_events_handler(event, context):
@@ -573,9 +580,6 @@ def import_campaign_handler(event, context):
     return response.build_response(201, None, 'Successfully imported')
 
 
-# def auto_expand(account_id, status,campaign_id,
-#     conversion_event_name,daily_budget,cac,number_of_adsets,
-#     name_template,access_token):
 def auto_expand_handler(event, context):
     '''
     Lambda handler to create a auto_expand
@@ -613,6 +617,8 @@ def auto_expand_handler(event, context):
     number_of_adsets = body.get('number_of_adsets')
     campaign_id = body.get('campaign_id')
     cac = body.get('cac')
+    status = body.get('status')
+    daily_budget = body.get('daily_budget')
 
     api = fb_api.get_facebook_api(fb_access_token)
 
@@ -636,40 +642,568 @@ def auto_expand_handler(event, context):
             'You must have at least 1 ad set in the campaign to run expansion.'
         )
 
-    # with db.get_rds_db().cursor() as cur:
-    #     expansion_query = """
-    #     INSERT INTO expansion_config
-    #     (campaign_id, expansion_enabled, autobid_budget, example_adset_id,
-    #     adset_name_template, number_of_ad_sets)
-    #     VALUES (%s, %s, %s, %s, %s, %s)
-    #     ON CONFLICT (campaign_id) DO UPDATE
-    #     SET expansion_enabled=%s, autobid_budget=%s, example_adset_id=%s,
-    #         adset_name_template=%s, number_of_ad_sets=%s
-    #     """
-    #     cur.execute(expansion_query, (
-    #     campaign_id, status, cac, example_adset_id, name_template, number_of_adsets,
-    #     status, cac, example_adset_id, name_template, number_of_adsets
-    #     ))
+    campaign_data = client.get_item(pk, campaign_id)
+    data = {
+        'campaign_id': campaign_id,
+        'campaign_name': campaign_name,
+        'created_at': date_created,
+        'conversion_event': conversion_event_name,
+        'budget': daily_budget,
+        'status': 'ACTIVE',
+        'expansion_enabled': status,
+        'autobid_budget': cac,
+        'example_adset_id': example_adset_id,
+        'adset_name_template': example_adset_id,
+        'number_of_ad_sets': number_of_adsets
+    }
+    if campaign_data:
+        campaign_data.update(data)
+        client.update_item(pk, campaign_id, campaign_data)
+    else:
+        client.create_item(pk, campaign_id, data)
 
-    #     campaign_query = """
-    #     INSERT INTO campaigns
-    #     (id, name, date_created, conversion_event, budget, status)
-    #     VALUES (%s, %s, %s, %s, %s, 'ACTIVE')
-    #     ON CONFLICT (id) DO UPDATE
-    #     SET conversion_event=%s, budget=%s
-    #     """
-    #     cur.execute(campaign_query, (
-    #     campaign_id, campaign_name, date_created, conversion_event_name, daily_budget,
-    #     conversion_event_name, daily_budget
-    #     ))
+    segment_params = {
+        'campaign_id': campaign_id,
+        'user': user_info.get('email'),
+        'status': status
+    }
+    notify(fb_account_id, "EXPANSION_STATUS", segment_params)
+    logger.info('Updated database')
 
-    # segment_params = {
-    #     'campaign_id':campaign_id,
-    #     'user':user.get_email(),
-    #     'status':status
-    # }
-    # segment.notify(account_id, "EXPANSION_STATUS", segment_params)
-    # print("Updated database")
+
+def get_lead_forms_handler(event, context):
+    '''
+    Lambda handler to create a get_lead_forms
+    '''
+    lambda_name: str = 'create_get_lead_forms'
+    logger.info(
+        'Received event in create_get_lead_forms: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'page_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    page_id = body.get('page_id')
+
+    # from a FB page ID, return a list of leadform names.
+    try:
+        # create list of leadgen form names
+        leadgen_form_names = []
+        leadgen_forms = []
+
+        # get list from FB
+        page = Page(page_id)
+        page.remote_read(fields=['access_token'])
+        if 'access_token' in page:
+            page_access_token = page['access_token']
+
+            page_api = fb_api.get_facebook_api(page_access_token)
+            page = Page(page_id, api=page_api)
+            page.remote_read(fields=['leadgen_forms'])
+
+        if 'leadgen_forms' in page:
+            data = page['leadgen_forms']
+            if 'data' in data:
+                leadgen_forms = data['data']
+
+        # cleanup to only get name.
+        for form in leadgen_forms:
+            print(form)
+            if 'name' in form:
+                leadgen_form_names.append((form['name'], form['id']))
+        return response.handler_response(
+            200,
+            leadgen_form_names,
+            'Success'
+        )
+
+    except Exception as e:
+        logger.error(f'error in get_lead_forms: {e}')
+        response.exception_response(e)
+
+
+def campaigns_get_adsets_handler(event, context):
+    '''
+    Lambda handler to create a campaigns_get_adsets
+    '''
+    lambda_name: str = 'create_campaigns_get_adsets'
+    logger.info(
+        'Received event in create_campaigns_get_adsets: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'campaign_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    campaign_id = body.get('campaign_id')
+
+    campaign = Campaign(campaign_id)
+    adset_list = list(campaign.get_ad_sets(fields=['name']))
+
+    return response.handler_response(
+        200,
+        [(a['name'], a['id']) for a in adset_list],
+        'Success'
+    )
+
+
+def get_ad_names_handler(event, context):
+    '''
+    Lambda handler to create a get_ad_names
+    '''
+    lambda_name: str = 'create_get_ad_names'
+    logger.info(
+        'Received event in create_get_ad_names: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+    user_info = client.get_item('User', user_id)
+    fb_account_id = user_info.get('fb_account_id')
+    # fb_access_token = user_info.get('fb_access_token')
+
+    try:
+        # api = fb_api.get_facebook_api(fb_access_token)
+        account = AdAccount('act_'+str(fb_account_id))
+
+        ad_list = list(make_request(
+            account.get_ads, fields=['id', 'name'], params={'limit': 200}
+        ))
+
+        ad_names = []
+        ad_name_list = []
+        for ad in ad_list:
+            if ad['name'] not in ad_name_list:
+                ad_name_list.append(ad['name'])
+                ad_names.append(
+                    {'name': ad['name'], 'id': ad['id'], 'build': False})
+
+        return response.handler_response(
+            200,
+            ad_names,
+            'Success'
+        )
+
+    except Exception as e:
+        if 'message' in str(e):
+            # raise Exception(e['message'])
+            return response.handler_response(
+                400,
+                None,
+                e['message']
+            )
+        else:
+            print(e)
+            # raise Exception(
+            #     "Sorry, looks like something went wrong. "
+            #     "Please message support for help.")
+            return response.handler_response(
+                400,
+                None,
+                'Sorry, looks like something went wrong.' +
+                'Please message support for help.'
+            )
+
+
+def get_current_billing_plan_handler(event, context):
+    '''
+    Lambda handler to create a get_current_billing_plan
+    '''
+    lambda_name: str = 'create_get_current_billing_plan'
+    logger.info(
+        'Received event in create_get_current_billing_plan: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    user_info = client.get_item('User', user_id)
+
+    email = user_info.get('email')
+
+    customer = stripe.get_customer(email)
+    has_card = customer and customer['sources']['data']
+    last4 = None
+    if has_card:
+        last4 = customer['sources']['data'][0].get("last4")
+
+    data = {
+        'name': user_info.get('credit_plan'),
+        'credits': int(user_info.get('spend_credits_left')),
+        'error': user_info.get('charge_error'),
+        'has_card': has_card,
+        'last4': last4
+    }
+
+    return response.handler_response(
+        200,
+        data,
+        'Success'
+    )
+
+
+def get_fb_campaign_status_handler(event, context):
+    '''
+    Lambda handler to get get_fb_campaign_status
+    '''
+    lambda_name: str = 'get_fb_campaign_status'
+    logger.info(
+        'Received event in get_fb_campaign_status: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    user_info = client.get_item('User', user_id)
+    fb_access_token = user_info.get('fb_access_token')
+
+    body_required_field = (
+        'campaign_id', 'preloaded_campaign_object',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    campaign_id = body.get('campaign_id')
+    preloaded_campaign_object = body.get('preloaded_campaign_object')
+
+    api = fb_api.get_facebook_api(fb_access_token)
+
+    if preloaded_campaign_object is None:
+        campaign = Campaign(campaign_id, api=api)
+        campaign.remote_read(fields=['objective', 'effective_status'])
+    else:
+        campaign = preloaded_campaign_object
+
+    return response.handler_response(
+        200,
+        campaign['effective_status'],
+        'Success'
+    )
+
+
+def update_campaign_status_db_handler(event, context):
+    '''
+    Lambda handler to get update_campaign_status_db
+    '''
+    lambda_name: str = 'update_campaign_status_db'
+    logger.info(
+        'Received event in update_campaign_status_db: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    user_info = client.get_item('User', user_id)
+    fb_account_id = user_info.get('fb_account_id')
+
+    body_required_field = (
+        'campaign_id', 'fb_status',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    campaign_id = body.get('campaign_id')
+    fb_status = body.get('fb_status')
+
+    campaign = client.get_item(pk, campaign_id)
+
+    if campaign and campaign.get('status') != fb_status:
+        client.update_item(pk, campaign_id, {'status': fb_status})
+    else:
+        client.create_item(pk, campaign_id, {
+            'fb_account_id': fb_account_id,
+            'status': fb_status
+        })
+    return response.handler_response(
+        200,
+        None,
+        'Success'
+    )
+
+
+def edit_fields_handler(event, context):
+    '''
+    Lambda handler for campaigns_edit_fields
+    '''
+    lambda_name: str = 'campaigns_edit_fields'
+    logger.info(
+        'Received event in campaigns_edit_fields: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'campaign_id', 'changes', 'originals',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    campaign_id = body.get('campaign_id')
+    changes = body.get('changes')
+    # originals = body.get('originals')
+
+    data = json.dumps(changes)
+    fb_account_id = client.get_item(pk, campaign_id).get('fb_account_id')
+    if not fb_account_id:
+        return response.handler_response(
+            400,
+            None,
+            'Bad campaign_id'
+        )
+
+    params = {
+        'account_id': fb_account_id,
+        'campaign_id': campaign_id,
+        'fields': data
+    }
+
+    task_id = start_async_task('update-campaign', params)
+    return response.handler_response(
+        200,
+        {'task_id': task_id},
+        'Success'
+    )
+
+
+def campaigns_check_async_handler(event, context):
+    '''
+    Lambda handler for campaigns_check_async
+    '''
+    lambda_name: str = 'campaigns_check_async'
+    logger.info(
+        'Received event in campaigns_check_async: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'asyncs', 'account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    asyncs = body.get('asyncs')
+    fb_account_id = body.get('fb_account_id')
+
+    return_value = []
+    for (campaign_id, task_id) in asyncs:
+        async_task = client.get_item('AsyncResult', task_id)
+        status = async_task.get('status')
+        result = async_task.get('result')
+
+        if result:
+            result = json.loads(result)
+
+        if status == 'done':
+            campaign_data = get_campaign(fb_account_id, campaign_id)
+            campaign_data['task_id'] = task_id
+            return_value.append(campaign_data)
+        if status == 'error':
+            return_value.append(
+                {
+                    'task_id': task_id,
+                    'error': result['error'],
+                    'campaign_id': campaign_id
+                }
+            )
+    return response.handler_response(
+        200,
+        return_value,
+        'Success'
+    )
+
+
+def get_ad_account_info_handler(event, context):
+    '''
+    Lambda handler for get_ad_account_info
+    '''
+    lambda_name: str = 'get_ad_account_info'
+    logger.info(
+        'Received event in get_ad_account_info: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'fb_account_id', 'fb_account_name',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    fb_account_id = body.get('fb_account_id')
+    fb_account_name = body.get('fb_account_name')
+
+    fb_info = client.query_item(
+        'FB_Account',
+        str(fb_account_id) + '-' + str(user_id),
+        {
+            'name': fb_account_name,
+            'account_type': 'facebook'
+        }
+    )
+    if not fb_info:
+        return response.handler_response(
+            400,
+            None,
+            'Bad fb_account_id or fb_account_name'
+        )
+
+    account_info = {
+        'access_token': fb_info[0].get('access_token'),
+        'fb_page_id': fb_info[0].get('fb_page_id'),
+        'fb_instagram_id': fb_info[0].get('fb_instagram_id'),
+    }
+
+    if fb_info[0].get('fb_pixel_id') > 0:
+        account_info['fb_pixel_id'] = fb_info[0].get('fb_pixel_id')
+    else:
+        account_info['fb_app_id'] = fb_info[0].get('fb_app_id')
+
+    return response.handler_response(
+        200,
+        account_info,
+        'Success'
+    )
+
+
+def run_auto_expansion_handler(event, context):
+    '''
+    Lambda handler for run_auto_expansion
+    '''
+    lambda_name: str = 'run_auto_expansion'
+    logger.info(
+        'Received event in run_auto_expansion: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    user_info = client.get_item('User', user_id)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'fb_account_id', 'campaign_id',
+        'maximum_number_adesets', 'starting_interest_list'
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    fb_account_id = body.get('fb_account_id')
+    campaign_id = body.get('campaign_id')
+    maximum_number_adsets = body.get('maximum_number_adsets', 5)
+    starting_interest_list = body.get('starting_interest_list')
+
+    data = json.dumps({
+        'fb_account_id': str(fb_account_id),
+        'campaign_id': str(campaign_id),
+        'max_adsets': int(maximum_number_adsets),
+        'interests': starting_interest_list if starting_interest_list else [],
+        'fb_access_token': user_info.get('fb_acccess_token'),
+        'force_expand': True
+    })
+    resp = start_async_task('auto-expand', data)
+
+    task_id = resp.get('task_id')
+    return response.handler_response(
+        200,
+        {'task_id': task_id},
+        'Success'
+    )
+
+
+def check_auto_expansion_handler(event, context):
+    '''
+    Lambda handler for check_auto_expansion
+    '''
+    lambda_name: str = 'check_auto_expansion'
+    logger.info(
+        'Received event in check_auto_expansion: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'task_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    task_id = body.get('task_id')
+
+    async_task = client.get_item('AsyncResult', task_id)
+    status = async_task.get('status')
+    result = async_task.get('result')
+
+    data = {
+        'status': status,
+        'result': result
+    }
+    return response.handler_response(
+        200,
+        data,
+        'Success'
+    )
 
 
 def campaign_list(event, context):
@@ -780,3 +1314,33 @@ def delete_campaign(event, context):
 
     return response.handler_response(
         200, None, 'Successfully deleted')
+
+
+def execute_async_task(event, context):
+    '''
+    handler to excute a SQS
+    '''
+    for record in event:
+        body = json.loads(record.body)
+        # task_name = body['task']
+        task_id = body['task_id']
+        params = body['params']
+
+        try:
+            client.update_item('AsyncResult', task_id, {'status': 'running'})
+            result = context(**params)
+            client.update_item('AsyncResult', task_id, {
+                'result': json.dumps(result),
+                'status': 'done',
+                'failed': False,
+                'done': True
+            })
+
+        except Exception as err:
+            print(traceback.format_exc())
+            client.update_item('AsyncResult', task_id, {
+                'result': json.dumps({"error": str(err)}),
+                'status': 'error',
+                'failed': True,
+                'done': False
+            })

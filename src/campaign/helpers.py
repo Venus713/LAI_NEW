@@ -1,4 +1,5 @@
 import uuid
+import os
 from dateutil.parser import parse
 from decimal import Decimal
 
@@ -9,6 +10,8 @@ from facebook_business.adobjects.customaudience import CustomAudience
 from facebook_business.exceptions import FacebookRequestError
 from facebook_business.adobjects.ad import Ad
 from collections import defaultdict
+import analytics
+import boto3
 
 from utils.logging import logger
 from utils.event_parser import EventParser
@@ -20,6 +23,7 @@ from utils.constants import default_conversions
 
 pk = 'Campaign'
 
+sqs_client = boto3.client('sqs')
 event_parser: EventParser = EventParser()
 client: DynamoDb = DynamoDb()
 auth: Authentication = Authentication()
@@ -490,3 +494,41 @@ def import_ad_helper(
                 'Campaign-Ad', str(uuid.uuid4()), campaign_ad_data)
 
     return canonical_id
+
+
+def notify(account_id, name, params):
+    analytics.write_key = '1cX2efK4R6oFInvsx57nMCIP5UDmG9zJ'
+
+    analytics.track(
+        int(account_id),
+        name,
+        params
+    )
+
+
+def make_request(req, fields=[], params={}):
+    result = []
+    response = req(fields=fields, params=params, pending=True).execute()
+    for item in response:
+        if isinstance(response.params, list):
+            response.params = {}
+        result.append(item.export_all_data())
+    return result
+
+
+def start_async_task(task, params):
+    task_id = uuid.uuid4()
+    client.create_item('AsyncResult', task_id, {'task': task})
+
+    logger.info("Launching %s Task" % task, params)
+
+    entries = {
+        "task": task,
+        "task_id": task_id,
+        "params": params
+    }
+    sqs_client.send_message(
+        QueueUrl=os.getenv('SQS_URL'),
+        Entries=entries)
+
+    return {"task_id": task_id}

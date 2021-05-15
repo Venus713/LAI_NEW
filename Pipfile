@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 facebook-business = "*"
 flake8 = "*"
+analytics = "*"
+stripe = "*"
+boto3 = "*"
 
 [dev-packages]
 boto3 = "*"
