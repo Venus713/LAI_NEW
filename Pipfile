@@ -9,6 +9,7 @@ flake8 = "*"
 analytics = "*"
 stripe = "*"
 boto3 = "*"
+analytics-python = "*"
 
 [dev-packages]
 boto3 = "*"

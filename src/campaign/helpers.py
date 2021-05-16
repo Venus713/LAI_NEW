@@ -8,6 +8,7 @@ from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.adspixel import AdsPixel
 from facebook_business.adobjects.customaudience import CustomAudience
 from facebook_business.exceptions import FacebookRequestError
+# from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.ad import Ad
 from collections import defaultdict
 import analytics
@@ -23,7 +24,7 @@ from utils.constants import default_conversions
 
 pk = 'Campaign'
 
-sqs_client = boto3.client('sqs')
+sqs_client = boto3.client('sqs', region_name='us-east-1')
 event_parser: EventParser = EventParser()
 client: DynamoDb = DynamoDb()
 auth: Authentication = Authentication()
@@ -39,8 +40,9 @@ def campaigns_conv_event_tuple_fix(conv_tuple_string):
     return split_str[0]
 
 
-def accounts_get_selectable_events(api, account_id):
-    acct = AdAccount("act_%s" % account_id)
+def accounts_get_selectable_events(fb_access_token, account_id):
+    fb_api.get_facebook_api(fb_access_token)
+    acct = AdAccount(f"act_{account_id}")
     # Standard set
     events = [(
         a.replace("_", " ").title(),
@@ -305,11 +307,13 @@ def get_campaign(
     return campaign_data
 
 
-def get_account_pixels(account_id):
+def get_account_pixels(fb_access_token, account_id):
     pixel_id_list = []
     pixel_tuple = [('', 0)]
 
-    account = AdAccount('act_'+str(account_id))
+    fb_api.get_facebook_api(fb_access_token)
+
+    account = AdAccount(f'act_{account_id}')
     account.remote_read(fields=['adspixels'])
 
     if 'adspixels' in account:
@@ -335,8 +339,9 @@ def get_account_pixels(account_id):
     return pixel_tuple
 
 
-def get_account_mobile_apps(account_id):
-    account = AdAccount('act_'+str(account_id))
+def get_account_mobile_apps(fb_access_token, account_id):
+    fb_api.get_facebook_api(fb_access_token)
+    account = AdAccount(f'act_{account_id}')
     account.get_advertisable_applications()
 
     app_tuple_list = [('', 0)]
@@ -354,8 +359,9 @@ def get_account_mobile_apps(account_id):
     return app_tuple_list
 
 
-def fb_get_active_audiences(account_id, ids=True):
-    account = AdAccount('act_'+str(account_id))
+def fb_get_active_audiences(fb_access_token, account_id, ids=True):
+    fb_api.get_facebook_api(fb_access_token)
+    account = AdAccount(f'act_{account_id}')
     custom_audience_resp = account.get_custom_audiences(
         fields=['id', 'name'], params={'limit': 200}
     )
@@ -376,9 +382,10 @@ def fb_get_active_audiences(account_id, ids=True):
     return custom_audience_names
 
 
-def fb_make_lookalikes(account_id, audience_id, country):
+def fb_make_lookalikes(fb_access_token, account_id, audience_id, country):
     try:
-        account = AdAccount('act_'+str(account_id))
+        fb_api.get_facebook_api(fb_access_token)
+        account = AdAccount(f'act_{account_id}')
         audience_list = []
 
         for i in [1, 2, 5]:
@@ -472,7 +479,8 @@ def import_ad_helper(
         'campaign_id': campaign_id,
         'ad_id': canonical_id
     }
-    client.create_item('Campaign-Ad', str(uuid.uuid4()), campaign_ad_data)
+    sk = str(campaign_id) + '-' + str(canonical_id)
+    client.create_item('Campaign-Ad', sk, campaign_ad_data)
 
     if campaign_ownership_tree is None:
         campaign_ownership_tree = build_campaign_ownership_tree(
@@ -490,8 +498,9 @@ def import_ad_helper(
                 'campaign_id': other_campaign_id,
                 'ad_id': canonical_id
             }
+            sk = str(campaign_id) + '-' + str(canonical_id)
             client.create_item(
-                'Campaign-Ad', str(uuid.uuid4()), campaign_ad_data)
+                'Campaign-Ad', sk, campaign_ad_data)
 
     return canonical_id
 

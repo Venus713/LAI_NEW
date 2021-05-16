@@ -354,7 +354,7 @@ class Cognito:
         except self.__client.exceptions.UserNotFoundException:
             return self.response.not_found_exception_response(email)
         except self.__client.exceptions.UserNotConfirmedException:
-            return self.response.user_not_confirmed_exception_response(email)        
+            return self.response.user_not_confirmed_exception_response(email)
         except self.__client.exceptions.InternalErrorException:
             return self.response.internal_error_exception_response()
         except Exception as e:
@@ -417,7 +417,7 @@ class Cognito:
         except self.__client.exceptions.TooManyRequestsException:
             return self.response.too_many_requests_exception_response()
         except self.__client.exceptions.PasswordResetRequiredException:
-            return self.response.password_reset_required_exception_response()  
+            return self.response.password_reset_required_exception_response()
         except self.__client.exceptions.InternalErrorException:
             return self.response.internal_error_exception_response()
         except Exception as e:
@@ -442,7 +442,7 @@ class Cognito:
         except self.__client.exceptions.TooManyRequestsException:
             return self.response.too_many_requests_exception_response()
         except self.__client.exceptions.PasswordResetRequiredException:
-            return self.response.password_reset_required_exception_response()   
+            return self.response.password_reset_required_exception_response()
         except self.__client.exceptions.InternalErrorException:
             return self.response.internal_error_exception_response()
         except Exception as e:

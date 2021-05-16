@@ -1,7 +1,9 @@
 import json
 import datetime
+import hashlib
 import traceback
 from decimal import Decimal
+from operator import itemgetter
 
 from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.adaccount import AdAccount
@@ -56,11 +58,19 @@ def get_selectable_events_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
+    fb_account_token = user_info.get('fb_access_token')
 
-    data = accounts_get_selectable_events(fb_account_id)
+    body_required_field = (
+        'fb_account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+    fb_account_id = resp.get('fb_account_id')
+
+    data = accounts_get_selectable_events(fb_account_token, fb_account_id)
 
     return response.handler_response(
         200, data, 'Successfully get the accounts_get_selectable_events')
@@ -77,11 +87,19 @@ def account_pixels_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
+    fb_access_token = user_info.get('fb_access_token')
 
-    data = get_account_pixels(fb_account_id)
+    body_required_field = (
+        'fb_account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+    fb_account_id = resp.get('fb_account_id')
+
+    data = get_account_pixels(fb_access_token, fb_account_id)
 
     return response.handler_response(
         200, data, 'Success in account_pixels')
@@ -99,11 +117,19 @@ def account_mobile_apps_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
+    fb_access_token = user_info.get('fb_access_token')
 
-    data = get_account_mobile_apps(fb_account_id)
+    body_required_field = (
+        'fb_account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+    fb_account_id = resp.get('fb_account_id')
+
+    data = get_account_mobile_apps(fb_access_token, fb_account_id)
     return response.handler_response(
         200, data, 'Success in account_mobile_apps')
 
@@ -141,11 +167,19 @@ def active_audiences_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
+    fb_access_token = user_info.get('fb_access_token')
 
-    data = fb_get_active_audiences(fb_account_id)
+    body_required_field = (
+        'fb_account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+    fb_account_id = resp.get('fb_account_id')
+
+    data = fb_get_active_audiences(fb_access_token, fb_account_id)
     return response.handler_response(
         200, data, 'Success in active_audiences')
 
@@ -162,23 +196,25 @@ def fb_make_lookalikes_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
+    fb_access_token = user_info.get('fb_access_token')
 
-    body_required_field = ('audience_id', 'country',)
+    body_required_field = ('audience_id', 'country', 'fb_account_id',)
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
     if res is False:
         return resp
 
     data = fb_make_lookalikes(
-        fb_account_id, res['audience_id'], res['country'])
+        fb_access_token,
+        resp['fb_account_id'],
+        resp['audience_id'],
+        resp['country'])
     return response.handler_response(
         200, data, 'Success in fb_make_lookalikes')
 
 
-def create_campain(event, context):
+def create_campaign(event, context):
     '''
     Lambda handler to create the campaigns
     '''
@@ -189,20 +225,22 @@ def create_campain(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
+    fb_access_token = user_info.get('fb_access_token')
+    fb_api.get_facebook_api(fb_access_token)
 
     body_required_field = (
-        'campaign_name', 'daily_budget', 'campaign_objective')
+        'campaign_name', 'daily_budget',
+        'campaign_objective', 'fb_account_id',
+    )
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
     if res is False:
         return resp
 
     body = json.loads(event['body'])
-
-    account = AdAccount(f'act_{fb_account_id}')
+    fb_account_id = resp['fb_account_id']
+    account = AdAccount(f"act_{fb_account_id}")
 
     try:
         campaign = account.create_campaign(params={
@@ -246,13 +284,13 @@ def create_fb_targeting_simple_handler(event, context):
         return response.auth_failed_response()
 
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
     fb_access_token = user_info.get('fb_access_token')
 
     body_required_field = (
-        'campaign_id', 'page_id', 'app_url', 'interests', 'audience_list'
+        'campaign_id', 'page_id', 'app_url', 'interests', 'audience_list',
         'gender', 'min_age', 'max_age', 'country', 'conversion_event',
-        'pixel_id', 'max_number_of_ads', 'adset_to_copy_targeting'
+        'pixel_id', 'max_number_of_ads', 'adset_to_copy_targeting',
+        'fb_account_id'
     )
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
@@ -261,15 +299,16 @@ def create_fb_targeting_simple_handler(event, context):
 
     body = json.loads(event['body'])
 
-    conversion_event = body.get('conversion_event')
+    fb_account_id = body.get('fb_account_id')
+    conversion_event = body.get('conversion_event', {})
     interests = body.get('interests')
     gender = body.get('gender')
     campaign_id = body.get('campaign_id')
     page_id = body.get('page_id')
     pixel_id = body.get('pixel_id')
     app_url = body.get('app_url')
-    audience_list = body.get('audience_list')
-    max_number_of_ads = body.get('max_number_of_ads')
+    audience_list = body.get('audience_list', [])
+    max_number_of_ads = body.get('max_number_of_ads', 10)
     adset_to_copy_targeting = body.get('adset_to_copy_targeting')
     min_age = body.get('min_age')
     max_age = body.get('max_age')
@@ -477,7 +516,11 @@ def create_fb_targeting_simple_handler(event, context):
             logger.info(
                 f'Created {len(adset_id_list)} adsets. ' +
                 'Example: {str(debug_example_adset)}')
-            return (adset_id_list, exceptions)
+            return response.handler_response(
+                200,
+                (adset_id_list, exceptions),
+                'Success'
+            )
 
     batch.execute()
     for adset in adset_list:
@@ -487,7 +530,11 @@ def create_fb_targeting_simple_handler(event, context):
     logger.info(
         f'Created {len(adset_id_list)} adsets. ' +
         f'Example: {str(debug_example_adset)}')
-    return (adset_id_list, exceptions)
+    return response.handler_response(
+        200,
+        (adset_id_list, exceptions),
+        'Success'
+    )
 
 
 def import_campaign_handler(event, context):
@@ -504,7 +551,6 @@ def import_campaign_handler(event, context):
         return response.auth_failed_response()
 
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
     fb_access_token = user_info.get('fb_access_token')
 
     body_required_field = (
@@ -512,7 +558,8 @@ def import_campaign_handler(event, context):
         'campaign_name',
         'conversion_event',
         'campaign_type',
-        'cpa_goal'
+        'cpa_goal',
+        'fb_account_id',
     )
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
@@ -521,6 +568,7 @@ def import_campaign_handler(event, context):
 
     body = json.loads(event['body'])
 
+    fb_account_id = body.get('fb_account_id')
     conversion_event = body.get('conversion_event')
     campaign_id = body.get('campaign_id')
     campaign_type = body.get('campaign_type')
@@ -534,7 +582,7 @@ def import_campaign_handler(event, context):
     campaign_type = campaign_type or "Interests"
     cpa_goal = Decimal(cpa_goal or "10.50")
 
-    campaign_info = client.get_item(pk, campaign_id)
+    campaign_info = client.get_item(pk, str(campaign_id))
     if campaign_info:
         logger.info(f'Campaign {campaign_id} has already has been imported')
 
@@ -561,7 +609,7 @@ def import_campaign_handler(event, context):
         'campaign_type': campaign_type
     }
 
-    client.create_item(pk, campaign_id, campaign_data)
+    client.create_item(pk, str(campaign_id), campaign_data)
 
     tree = build_campaign_ownership_tree(api, fb_account_id)
     logger.debug(str(tree))
@@ -594,10 +642,10 @@ def auto_expand_handler(event, context):
         return response.auth_failed_response()
 
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
     fb_access_token = user_info.get('fb_access_token')
 
     body_required_field = (
+        'fb_account_id',
         'status',
         'campaign_id',
         'conversion_event_name',
@@ -613,6 +661,7 @@ def auto_expand_handler(event, context):
 
     body = json.loads(event['body'])
 
+    fb_account_id = body.get('fb_account_id')
     conversion_event_name = body.get('conversion_event_name')[0]
     number_of_adsets = body.get('number_of_adsets')
     campaign_id = body.get('campaign_id')
@@ -780,8 +829,18 @@ def get_ad_names_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-    user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
+
+    body_required_field = (
+        'fb_account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    fb_account_id = body.get('fb_account_id')
     # fb_access_token = user_info.get('fb_access_token')
 
     try:
@@ -815,7 +874,7 @@ def get_ad_names_handler(event, context):
                 e['message']
             )
         else:
-            print(e)
+            logger.error(f'error in get_ad_names_handler: {e}')
             # raise Exception(
             #     "Sorry, looks like something went wrong. "
             #     "Please message support for help.")
@@ -922,11 +981,8 @@ def update_campaign_status_db_handler(event, context):
     if auth_res is False:
         return response.auth_failed_response()
 
-    user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
-
     body_required_field = (
-        'campaign_id', 'fb_status',
+        'campaign_id', 'fb_status', 'fb_account_id',
     )
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
@@ -935,6 +991,7 @@ def update_campaign_status_db_handler(event, context):
 
     body = json.loads(event['body'])
 
+    fb_account_id = body.get('fb_account_id')
     campaign_id = body.get('campaign_id')
     fb_status = body.get('fb_status')
 
@@ -1018,7 +1075,7 @@ def campaigns_check_async_handler(event, context):
         return response.auth_failed_response()
 
     body_required_field = (
-        'asyncs', 'account_id',
+        'asyncs', 'fb_account_id',
     )
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
@@ -1206,6 +1263,279 @@ def check_auto_expansion_handler(event, context):
     )
 
 
+def update_interests_handler(event, context):
+    '''
+    Lambda handler for update_interests
+    '''
+    lambda_name: str = 'update_interests'
+    logger.info(
+        'Received event in update_interests: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    user_info = client.get_item('User', user_id)
+    fb_access_token = user_info.get('fb_access_token')
+    api = fb_api.get_facebook_api(fb_access_token)
+
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'campaign_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    campaign_id = body.get('campaign_id')
+
+    campaign = Campaign(campaign_id, api=api)
+    # get ad sets from campaign
+    adset_list = make_request(
+        campaign.get_ad_sets,
+        fields=['name', 'targeting']
+    )
+    for adset in adset_list:
+        try:
+            adset = AdSet(adset['id'])
+            adset.remote_read(fields=['name', 'targeting'])
+            targeting = adset['targeting']
+            if 'interests' in targeting or 'flexible_spec' in targeting:
+                logger.info('skip in update_interests')
+            else:
+                interest_list = TargetingSearch.search(params={
+                    'q': str(adset['name']),
+                    'type': 'adinterest'
+                })
+                if len(interest_list) > 0:
+                    interest = interest_list[0]
+                    if str(
+                        (adset['name']).lower()
+                    ) in (interest['name'].lower()):
+                        interests = {
+                            'id': interest['id'],
+                            'name': interest['name']
+                        }
+
+                targeting['interests'] = interests
+                adset['targeting'] = targeting
+                adset.remote_update()
+                adset.remote_read(fields=['name', 'targeting'])
+                targeting['interests'] = interests
+                adset['targeting'] = targeting
+                adset.remote_update()
+                adset.remote_read(fields=['name', 'targeting'])
+                return response.handler_response(
+                    200,
+                    None,
+                    'Success'
+                )
+        except Exception as e:
+            logger.error(f'error in update_interests: {e}')
+            return response.handler_response(
+                400,
+                None,
+                'Errro in updating interests'
+            )
+
+
+def hide_campaign_handler(event, context):
+    '''
+    Lambda handler for hide_campaign
+    '''
+    lambda_name: str = 'hide_campaign'
+    logger.info(
+        'Received event in hide_campaign: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'campaign_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    campaign_id = body.get('campaign_id')
+
+    campaign_contains_ads = client.query_item(
+        'Campaign_Ad',
+        {'campaign_id': campaign_id}
+    )
+    for c in campaign_contains_ads:
+        sk = c.get('campaign_id') + '-' + c.get('ad_id')
+        client.delete_item('Campaign_Ad', sk)
+        client.delete_item(pk, c.get('campaign_id'))
+    return response.handler_response(
+        200,
+        None,
+        'Success'
+    )
+
+
+def accounts_get_custom_audiences_handler(event, context):
+    '''
+    Lambda handler for accounts_get_custom_audiences
+    '''
+    lambda_name: str = 'accounts_get_custom_audiences'
+    logger.info(
+        'Received event in accounts_get_custom_audiences: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'fb_account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    fb_account_id = body.get('fb_account_id')
+
+    acct = AdAccount("act_%s" % fb_account_id)
+    resp = [
+        {'id': a['id'], 'name': a['name']}
+        for a in acct.get_custom_audiences(
+            fields=['id', 'name'],
+            params={'limit': 200}
+        )
+    ]
+    return response.handler_response(
+        200,
+        resp,
+        'Success'
+    )
+
+
+def get_importable_from_api_handler(event, context):
+    '''
+    Lambda handler for campaigns_get_importable_from_api
+    '''
+    lambda_name: str = 'campaigns_get_importable_from_api'
+    logger.info(
+        'Received event in campaigns_get_importable_from_api: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    user_info = client.get_item('User', user_id)
+    fb_access_token = user_info.get('fb_access_token')
+
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'fb_account_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    fb_account_id = body.get('fb_account_id')
+
+    api = fb_api.get_facebook_api(fb_access_token)
+
+    account = AdAccount('act_' + str(fb_account_id), api=api)
+
+    campaigns = make_request(
+        account.get_campaigns, fields=['id', 'name'], params={'limit': 200}
+    )
+
+    campaign_list = []
+
+    for campaign in campaigns:
+        campaign_list.append((campaign['name'], campaign['id']))
+
+    campaign_list_sorted = sorted(campaign_list, key=lambda c: c[0])
+    hashed_data = hashlib.sha256(
+        repr(campaign_list_sorted).encode('utf-8')
+    ).hexdigest()
+
+    data = {
+        'importable': campaign_list_sorted,
+        'hashed_data': hashed_data
+    }
+    logger.info(f"hashed value of data from api: {data['hashed_data']}")
+    return response.handler_response(
+        200,
+        campaign_list_sorted,
+        'Success'
+    )
+
+
+def get_expansion_interests_campaign_handler(event, context):
+    '''
+    Lambda handler for get_expansion_interests_campaign
+    '''
+    lambda_name: str = 'get_expansion_interests_campaign'
+    logger.info(
+        'Received event in get_expansion_interests_campaign: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'fb_account_id', 'campaign_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+
+    fb_account_id = body.get('fb_account_id')
+    campaign_id = body.get('campaign_id')
+
+    fb_exp_inter_data = client.query_item('FB_Exp_Interests', {
+        'fb_account_id': fb_account_id,
+        'campaign_id': campaign_id
+    })
+    fb_exp_inter_data.sort(key=itemgetter('status'), reverse=False)
+    fb_exp_inter_data.sort(key=itemgetter('date_created'), reverse=True)
+    fb_exp_inter_data = fb_exp_inter_data[0:20]
+
+    on_states = [
+      'ACTIVE',
+      'PENDING_REVIEW',
+      'PREAPPROVED'
+    ]
+
+    res_data = [{
+      'adset_interest': row.get('adset_interest'),
+      'date_created': row.get('date_created').strftime("%m/%d/%Y"),
+      'status': 'on' if row.get('status') in on_states else 'off'
+    } for row in fb_exp_inter_data]
+
+    return response.handler_response(
+        200,
+        res_data,
+        'Success'
+    )
+
+
 def campaign_list(event, context):
     '''
     Lambda handler to get campaign_list
@@ -1219,8 +1549,18 @@ def campaign_list(event, context):
         return response.auth_failed_response()
 
     user_info = client.get_item('User', user_id)
-    fb_account_id = user_info.get('fb_account_id')
     fb_access_token = user_info.get('fb_access_token')
+
+    body_required_field = (
+        'fb_account_id', 'campaign_id',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+
+    body = json.loads(event['body'])
+    fb_account_id = body.get('fb_account_id')
 
     api = fb_api.get_facebook_api(fb_access_token)
 
@@ -1310,7 +1650,8 @@ def delete_campaign(event, context):
         {'campaign_id': campaign_id}
     )
     for c in campaign_contains_ads:
-        client.delete_item('Campaign_Ad', 'campaign_id', c.get('campaign_id'))
+        sk = c.get('campaign_id') + '-' + c.get('ad_id')
+        client.delete_item('Campaign_Ad', sk)
 
     return response.handler_response(
         200, None, 'Successfully deleted')

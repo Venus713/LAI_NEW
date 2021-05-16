@@ -30,7 +30,7 @@ class Authentication:
                 f'dynamodb userinfo from access_token in is_auth: {user_info}')
             if user_info:
                 logger.info('user auth is success.')
-                return True, user_info[0].get('role'), user_id
+                return True, user_info.get('role'), user_id
             else:
                 logger.info(
                     'user auth is success, but does not have profile')

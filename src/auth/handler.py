@@ -116,6 +116,11 @@ def confirm_facebook(event, context):
     logger.info(
         f'Received event in confirm_fb: {json.dumps(event, indent=2)}')
 
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+
+    if auth_res is False:
+        return response.auth_failed_response()
+
     body = json.loads(event['body'])
     body_required_field = ('user_id', 'fb_access_token',)
 
@@ -152,13 +157,17 @@ def confirm_facebook(event, context):
             'credit_plan': '',
             'spend_credits_left': 0
         }
-        sk = str(fb_account_id) + '-' + str(user_id)
-        client.create_item('FB_Account', sk, user_fb_info)
+        sk1 = str(fb_account_id) + '-' + str(user_id)
+        # sk2 = str(user_id) + '-' + str(fb_account_id)
+        client.create_item('FB_Account', sk1, user_fb_info)
+        # client.create_item('FB_Account', sk2, user_fb_info)
 
     user_info.update({
         'is_onboarding_complete': True,
         'fb_access_token': fb_access_token
     })
+    user_info.pop('sk')
+    user_info.pop('pk')
     resp = client.update_item(pk, user_id, user_info)
     logger.info(f'update_item response in confirm_fb: {resp}')
 

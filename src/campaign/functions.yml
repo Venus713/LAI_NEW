@@ -1,9 +1,99 @@
-create_campain:
-  handler: src/campaign/handler.create_campain
+create_campaign:
+  handler: src/campaign/handler.create_campaign
   events:
     - http:
         path: campaings/
         method: post
+        cors:
+          origin: '*'
+
+campaigns_check_async:
+  handler: src/campaign/handler.campaigns_check_async_handler
+  events:
+    - http:
+        path: campaings/campaigns_check_async/
+        method: post
+        cors:
+          origin: '*'
+
+get_ad_account_info:
+  handler: src/campaign/handler.get_ad_account_info_handler
+  events:
+    - http:
+        path: campaings/ad_account_info/
+        method: get
+        cors:
+          origin: '*'
+
+run_auto_expansion:
+  handler: src/campaign/handler.run_auto_expansion_handler
+  events:
+    - http:
+        path: campaings/run_auto_expansion/
+        method: post
+        cors:
+          origin: '*'
+
+check_auto_expansion:
+  handler: src/campaign/handler.check_auto_expansion_handler
+  events:
+    - http:
+        path: campaings/check_auto_expansion/
+        method: get
+        cors:
+          origin: '*'
+
+update_interests:
+  handler: src/campaign/handler.update_interests_handler
+  events:
+    - http:
+        path: campaings/update_interests/
+        method: put
+        cors:
+          origin: '*'
+
+hide_campaign:
+  handler: src/campaign/handler.hide_campaign_handler
+  events:
+    - http:
+        path: campaings/hide_campaign/
+        method: delete
+        cors:
+          origin: '*'
+
+accounts_get_custom_audiences:
+  handler: src/campaign/handler.accounts_get_custom_audiences_handler
+  events:
+    - http:
+        path: campaings/accounts_get_custom_audiences/
+        method: get
+        cors:
+          origin: '*'
+
+get_importable_from_api:
+  handler: src/campaign/handler.get_importable_from_api_handler
+  events:
+    - http:
+        path: campaings/importable_from_api/
+        method: get
+        cors:
+          origin: '*'
+          
+get_expansion_interests:
+  handler: src/campaign/handler.get_expansion_interests_campaign_handler
+  events:
+    - http:
+        path: campaings/expansion_interests/
+        method: get
+        cors:
+          origin: '*'
+
+delete_campaign:
+  handler: src/campaign/handler.delete_campaign
+  events:
+    - http:
+        path: campaigns/{id}
+        method: delete
         cors:
           origin: '*'
 
@@ -16,41 +106,32 @@ campain_list:
         cors:
           origin: '*'
 
-retrieve_campaign:
-  handler: src/campaign/handler.retrieve_campaign
-  events:
-    - http:
-        path: campaigns/{id}
-        method: get
-        cors:
-          origin: '*'
+# retrieve_campaign:
+#   handler: src/campaign/handler.retrieve_campaign
+#   events:
+#     - http:
+#         path: campaigns/{id}
+#         method: get
+#         cors:
+#           origin: '*'
 
-search_campaign:
-  handler: src/campaign/handler.search_campaign
-  events:
-    - http:
-        path: campaigns/search/{key}
-        method: get
-        cors:
-          origin: '*'
+# search_campaign:
+#   handler: src/campaign/handler.search_campaign
+#   events:
+#     - http:
+#         path: campaigns/search/{key}
+#         method: get
+#         cors:
+#           origin: '*'
 
-update_campaign:
-  handler: src/campaign/handler.update_campaign
-  events:
-    - http:
-        path: campaigns/{id}
-        method: put
-        cors:
-          origin: '*'
-
-delete_campaign:
-  handler: src/campaign/handler.delete_campaign
-  events:
-    - http:
-        path: campaigns/{id}
-        method: delete
-        cors:
-          origin: '*'
+# update_campaign:
+#   handler: src/campaign/handler.update_campaign
+#   events:
+#     - http:
+#         path: campaigns/{id}
+#         method: put
+#         cors:
+#           origin: '*'
 
 # campaign_from_facebook:
 #   handler: campaign/handler.campaign_from_facebook
@@ -74,7 +155,7 @@ get_selectable_events:
   handler: src/campaign/handler.get_selectable_events_handler
   events:
     - http:
-        path: campaings/get_selectable_events/
+        path: campaings/selectable_events/
         method: get
         cors:
           origin: '*'
@@ -92,7 +173,7 @@ get_page_list:
   handler: src/campaign/handler.get_page_list_handler
   events:
     - http:
-        path: campaings/get_page_list/
+        path: campaings/page_list/
         method: get
         cors:
           origin: '*'
@@ -128,7 +209,7 @@ create_fb_targeting_simple:
   handler: src/campaign/handler.create_fb_targeting_simple_handler
   events:
     - http:
-        path: campaings/create_fb_targeting_simple/
+        path: campaings/fb_targeting_simple/
         method: post
         cors:
           origin: '*'
@@ -139,6 +220,69 @@ import_campaign:
     - http:
         path: campaings/import_campaign/
         method: post
+        cors:
+          origin: '*'
+
+auto_expand:
+  handler: src/campaign/handler.auto_expand_handler
+  events:
+    - http:
+        path: campaings/auto_expand/
+        method: get
+        cors:
+          origin: '*'
+
+get_lead_forms:
+  handler: src/campaign/handler.get_lead_forms_handler
+  events:
+    - http:
+        path: campaings/lead_forms/
+        method: get
+        cors:
+          origin: '*'
+
+campaigns_get_adsets:
+  handler: src/campaign/handler.campaigns_get_adsets_handler
+  events:
+    - http:
+        path: campaings/adsets/
+        method: get
+        cors:
+          origin: '*'
+
+get_ad_names:
+  handler: src/campaign/handler.get_ad_names_handler
+  events:
+    - http:
+        path: campaings/ad_names/
+        method: get
+        cors:
+          origin: '*'
+
+get_current_billing_plan:
+  handler: src/campaign/handler.get_current_billing_plan_handler
+  events:
+    - http:
+        path: campaings/current_billing_plan/
+        method: get
+        cors:
+          origin: '*'
+
+get_fb_campaign_status:
+  handler: src/campaign/handler.get_fb_campaign_status_handler
+  events:
+    - http:
+        path: campaings/status/
+        method: get
+        cors:
+          origin: '*'
+
+update_campaign_status_db:
+  handler: src/campaign/handler.update_campaign_status_db_handler
+  events:
+    - http:
+        path: campaings/status_db/
+        method: put
         cors:
           origin: '*'
 
