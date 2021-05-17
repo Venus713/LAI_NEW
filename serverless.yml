@@ -55,10 +55,10 @@ provider:
         - "arn:aws:s3:::${self:custom.s3BucketName}/*"
         - "arn:aws:s3:::${self:custom.s3BucketName}"
     - Effect: "Allow"
-          Action:
-            - "sqs:SendMessage"
-          Resource:
-            Fn::GetAtt: [ SQSQueue, Arn ]
+      Action:
+        - "sqs:SendMessage"
+      Resource:
+        Fn::GetAtt: [ SQSQueue, Arn ]
 
 package:
   exclude:
