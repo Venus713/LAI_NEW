@@ -33,7 +33,8 @@ from .helpers import (
     build_campaign_ownership_tree,
     notify,
     make_request,
-    start_async_task
+    start_async_task,
+    update_campaign
 )
 
 pk = 'Campaign'
@@ -718,6 +719,11 @@ def auto_expand_handler(event, context):
     }
     notify(fb_account_id, "EXPANSION_STATUS", segment_params)
     logger.info('Updated database')
+    return response.handler_response(
+        200,
+        segment_params,
+        'Success'
+    )
 
 
 def get_lead_forms_handler(event, context):
@@ -732,6 +738,8 @@ def get_lead_forms_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
+    user_info = client.get_item('User', user_id)
+    api = fb_api.get_facebook_api(user_info.get('fb_access_token'))
 
     body_required_field = (
         'page_id',
@@ -752,7 +760,7 @@ def get_lead_forms_handler(event, context):
         leadgen_forms = []
 
         # get list from FB
-        page = Page(page_id)
+        page = Page(page_id, api=api)
         page.remote_read(fields=['access_token'])
         if 'access_token' in page:
             page_access_token = page['access_token']
@@ -779,7 +787,7 @@ def get_lead_forms_handler(event, context):
 
     except Exception as e:
         logger.error(f'error in get_lead_forms: {e}')
-        response.exception_response(e)
+        return response.exception_response(e)
 
 
 def campaigns_get_adsets_handler(event, context):
@@ -794,6 +802,8 @@ def campaigns_get_adsets_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
+    user_info = client.get_item('User', user_id)
+    fb_api.get_facebook_api(user_info.get('fb_access_token'))
 
     body_required_field = (
         'campaign_id',
@@ -829,6 +839,7 @@ def get_ad_names_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
+    user_info = client.get_item('User', user_id)
 
     body_required_field = (
         'fb_account_id',
@@ -841,11 +852,11 @@ def get_ad_names_handler(event, context):
     body = json.loads(event['body'])
 
     fb_account_id = body.get('fb_account_id')
-    # fb_access_token = user_info.get('fb_access_token')
+    fb_access_token = user_info.get('fb_access_token')
 
     try:
-        # api = fb_api.get_facebook_api(fb_access_token)
-        account = AdAccount('act_'+str(fb_account_id))
+        fb_api.get_facebook_api(fb_access_token)
+        account = AdAccount(f'act_{fb_account_id}')
 
         ad_list = list(make_request(
             account.get_ads, fields=['id', 'name'], params={'limit': 200}
@@ -911,7 +922,7 @@ def get_current_billing_plan_handler(event, context):
 
     data = {
         'name': user_info.get('credit_plan'),
-        'credits': int(user_info.get('spend_credits_left')),
+        'credits': int(user_info.get('spend_credits_left', 0)),
         'error': user_info.get('charge_error'),
         'has_card': has_card,
         'last4': last4
@@ -955,7 +966,7 @@ def get_fb_campaign_status_handler(event, context):
 
     api = fb_api.get_facebook_api(fb_access_token)
 
-    if preloaded_campaign_object is None:
+    if not preloaded_campaign_object:
         campaign = Campaign(campaign_id, api=api)
         campaign.remote_read(fields=['objective', 'effective_status'])
     else:
@@ -997,8 +1008,9 @@ def update_campaign_status_db_handler(event, context):
 
     campaign = client.get_item(pk, campaign_id)
 
-    if campaign and campaign.get('status') != fb_status:
-        client.update_item(pk, campaign_id, {'status': fb_status})
+    if campaign:
+        if campaign.get('status') != fb_status:
+            client.update_item(pk, campaign_id, {'status': fb_status})
     else:
         client.create_item(pk, campaign_id, {
             'fb_account_id': fb_account_id,
@@ -1048,7 +1060,8 @@ def edit_fields_handler(event, context):
         )
 
     params = {
-        'account_id': fb_account_id,
+        'user_id': user_id,
+        'fb_account_id': fb_account_id,
         'campaign_id': campaign_id,
         'fields': data
     }
@@ -1661,21 +1674,27 @@ def execute_async_task(event, context):
     '''
     handler to excute a SQS
     '''
-    for record in event:
-        body = json.loads(record.body)
+    for record in event.get('Records'):
+        body = json.loads(record.get('body'))
+        print(f'{body=}')
         # task_name = body['task']
         task_id = body['task_id']
         params = body['params']
 
         try:
             client.update_item('AsyncResult', task_id, {'status': 'running'})
-            result = context(**params)
+            result = update_campaign(**params)
             client.update_item('AsyncResult', task_id, {
                 'result': json.dumps(result),
                 'status': 'done',
                 'failed': False,
                 'done': True
             })
+            return response.handler_response(
+                200,
+                None,
+                'SQS task succeed.'
+            )
 
         except Exception as err:
             print(traceback.format_exc())
@@ -1685,3 +1704,8 @@ def execute_async_task(event, context):
                 'failed': True,
                 'done': False
             })
+            return response.handler_response(
+                400,
+                None,
+                'SQS task raised exception.'
+            )

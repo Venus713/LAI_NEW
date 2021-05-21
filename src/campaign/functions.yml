@@ -299,7 +299,7 @@ edit_fields:
         Ref: SQSQueue
 
 execute_async_task:
-    handler: src.handler.execute_async_task
+    handler: src.campaign.handler.execute_async_task
     events:
       - sqs:
           arn:
