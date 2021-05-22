@@ -1,7 +1,13 @@
 import json
+import datetime
 from typing import Any
 
 from .logging import logger
+
+
+def default(o):
+    if type(o) is datetime.date or type(o) is datetime.datetime:
+        return o.isoformat()
 
 
 class Response:
@@ -9,7 +15,7 @@ class Response:
     def build_response(self, status_code: Any, body: Any, msg: str) -> dict:
         logger.info(
             'Returned resp body in build_response: ' +
-            f'{json.dumps(body, indent=2)}')
+            f'{json.dumps(body, indent=2, default=default)}')
         return {
             'statusCode': status_code,
             'headers': {
@@ -20,7 +26,7 @@ class Response:
             'body': json.dumps({
                 'data': body,
                 'message': msg
-            })
+            }, default=default)
         }
 
     def handler_response(self, code: Any, body: Any, msg) -> dict:

@@ -1101,7 +1101,9 @@ def campaigns_check_async_handler(event, context):
     fb_account_id = body.get('fb_account_id')
 
     return_value = []
-    for (campaign_id, task_id) in asyncs:
+    for a in asyncs:
+        campaign_id = a.get('campaign_id')
+        task_id = a.get('task_id')
         async_task = client.get_item('AsyncResult', task_id)
         status = async_task.get('status')
         result = async_task.get('result')
@@ -1156,8 +1158,8 @@ def get_ad_account_info_handler(event, context):
 
     fb_info = client.query_item(
         'FB_Account',
-        str(fb_account_id) + '-' + str(user_id),
         {
+            'fb_account_id': fb_account_id,
             'name': fb_account_name,
             'account_type': 'facebook'
         }
@@ -1170,12 +1172,12 @@ def get_ad_account_info_handler(event, context):
         )
 
     account_info = {
-        'access_token': fb_info[0].get('access_token'),
+        'fb_access_token': fb_info[0].get('fb_access_token'),
         'fb_page_id': fb_info[0].get('fb_page_id'),
         'fb_instagram_id': fb_info[0].get('fb_instagram_id'),
     }
 
-    if fb_info[0].get('fb_pixel_id') > 0:
+    if fb_info[0].get('fb_pixel_id'):
         account_info['fb_pixel_id'] = fb_info[0].get('fb_pixel_id')
     else:
         account_info['fb_app_id'] = fb_info[0].get('fb_app_id')
@@ -1203,7 +1205,7 @@ def run_auto_expansion_handler(event, context):
 
     body_required_field = (
         'fb_account_id', 'campaign_id',
-        'maximum_number_adesets', 'starting_interest_list'
+        'maximum_number_adsets', 'starting_interest_list'
     )
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
@@ -1341,11 +1343,7 @@ def update_interests_handler(event, context):
                 adset['targeting'] = targeting
                 adset.remote_update()
                 adset.remote_read(fields=['name', 'targeting'])
-                return response.handler_response(
-                    200,
-                    None,
-                    'Success'
-                )
+
         except Exception as e:
             logger.error(f'error in update_interests: {e}')
             return response.handler_response(
@@ -1353,6 +1351,11 @@ def update_interests_handler(event, context):
                 None,
                 'Errro in updating interests'
             )
+    return response.handler_response(
+        200,
+        None,
+        'Success'
+    )
 
 
 def hide_campaign_handler(event, context):
@@ -1409,6 +1412,9 @@ def accounts_get_custom_audiences_handler(event, context):
 
     if auth_res is False:
         return response.auth_failed_response()
+    user_info = client.get_item('User', user_id)
+    fb_access_token = user_info.get('fb_access_token')
+    fb_api.get_facebook_api(fb_access_token)
 
     body_required_field = (
         'fb_account_id',
@@ -1600,11 +1606,11 @@ def campaign_list(event, context):
                 batch=batcher.get_batch()
             )
 
-    row_by_id = {row[0]: row for row in campaign_rows}
+    row_by_id = {row.get('campaign_id'): row for row in campaign_rows}
 
     campaign_data = []
     for result in results:
-        campaign_id = result.get('campaign_id')
+        campaign_id = result.get('id')
         if 'daily_budget' not in result.keys():
             logger.info(f"No daily budget found for: {campaign_id} ")
             result['daily_budget'] = 0
@@ -1624,7 +1630,8 @@ def campaign_list(event, context):
         except Exception as e:
             logger.error(f'errro in campaign_list: {e}')
 
-    available_conversion_events = accounts_get_selectable_events(fb_account_id)
+    available_conversion_events = accounts_get_selectable_events(
+        fb_access_token, fb_account_id)
 
     for c in campaign_data:
         c['available_events'] = available_conversion_events

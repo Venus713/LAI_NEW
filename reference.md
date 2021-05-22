@@ -438,7 +438,7 @@
 }
 ```
 
-15. update_campaign_status_db
+16. update_campaign_status_db
 - method: put
 - path: `campaings/status_db/`
 - payload:
@@ -456,7 +456,7 @@
 }
 ```
 
-16. edit_fields
+17. edit_fields
 - method: post
 - path: `campaings/edit_fields/`
 - payload:
@@ -474,14 +474,14 @@
 }
 ```
 
-17. campaigns_check_async
+18. campaigns_check_async
 - method: post
 - path: `campaings/campaigns_check_async/`
 - payload:
 ```
 {
     "account_id": "***",
-    "asyncs": "***"
+    "asyncs": [{'campaign_id': ***, 'task_id': ***}, ...]
 }
 ```
 - headers:
@@ -491,7 +491,7 @@
 }
 ```
 
-18. get_ad_account_info
+19. get_ad_account_info
 - method: get
 - path: `campaings/ad_account_info/`
 - payload:
@@ -508,7 +508,7 @@
 }
 ```
 
-19. run_auto_expansion
+20. run_auto_expansion
 - method: post
 - path: `campaings/run_auto_expansion/`
 - payload:
@@ -517,7 +517,7 @@
     "fb_account_id": "***",
     "campaign_id": "***",
     "maximum_number_adesets": "***",
-    "starting_interest_list": "***"
+    "starting_interest_list": [***]
 }
 ```
 - headers:
@@ -527,7 +527,7 @@
 }
 ```
 
-20. check_auto_expansion
+21. check_auto_expansion
 - method: get
 - path: `campaings/check_auto_expansion/`
 - payload:
@@ -543,7 +543,7 @@
 }
 ```
 
-21. update_interests
+22. update_interests
 - method: put
 - path: `campaings/update_interests/`
 - payload:
@@ -559,7 +559,7 @@
 }
 ```
 
-22. hide_campaign
+23. hide_campaign
 - method: delete
 - path: `campaings/hide_campaign/`
 - payload:
@@ -575,7 +575,7 @@
 }
 ```
 
-23. accounts_get_custom_audiences
+24. accounts_get_custom_audiences
 - method: get
 - path: `campaings/accounts_get_custom_audiences/`
 - payload:
@@ -591,7 +591,7 @@
 }
 ```
 
-24. get_importable_from_api
+25. get_importable_from_api
 - method: get
 - path: `campaings/importable_from_api/`
 - payload:
@@ -607,7 +607,7 @@
 }
 ```
 
-25. get_expansion_interests
+26. get_expansion_interests
 - method: get
 - path: `campaings/expansion_interests/`
 - payload:
@@ -624,7 +624,7 @@
 }
 ```
 
-26. campain_list
+27. campain_list
 - method: get
 - path: `campaings/`
 - payload:

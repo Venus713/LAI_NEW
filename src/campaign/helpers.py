@@ -239,25 +239,25 @@ def get_campaign(
         campaign_data['daily_budget'] = int(campaign['daily_budget'])
     else:
         campaign_data['daily_budget'] = (
-            int(campaign_info[0].get('daily_budget')) or 0
+            int(campaign_info.get('daily_budget', 0))
         )
-    campaign_data['cpa_goal'] = int(campaign_info[0].get('cpa_goal'))*100 or 0
-    campaign_data['date_created'] = parse(campaign_info[0].get('created_at'))
+    campaign_data['cpa_goal'] = int(campaign_info.get('cpa_goal', 0))*100
+    campaign_data['date_created'] = parse(campaign_info.get('created_at'))
     # campaign_data['campaign_status'] = data[7]
     campaign_data['auto_expansion_status'] = (
-        campaign_info[0].get('expansion_enabled') or False
+        campaign_info.get('expansion_enabled', False)
     )
     campaign_data['ad_optimization_status'] = (
-        campaign_info[0].get('optimization_enabled') or False
+        campaign_info.get('optimization_enabled', False)
     )
     campaign_data['auto_expansion_level'] = (
-        campaign_info[0].get('number_of_ad_sets') or 0
+        campaign_info.get('number_of_ad_sets', 0)
     )
     campaign_data['naming_convention'] = (
-        campaign_info[0].get('adset_name_template')
+        campaign_info.get('adset_name_template')
     )
     campaign_data['ad_optimization_level'] = (
-        campaign_info[0].get('number_of_ads') or 0
+        campaign_info.get('number_of_ads', 0)
     )
 
     logger.info(f'campaign data in get_campaign: {campaign_data}')
@@ -265,16 +265,16 @@ def get_campaign(
     # check to see if the conversion_event from db is a tuple, if it is,
     # update the record to the correct format.+
     if (
-        '{' in campaign_info[0].get('conversion_event') and '}' in (
-            campaign_info[0].get('conversion_event')
+        '{' in campaign_info.get('conversion_event') and '}' in (
+            campaign_info.get('conversion_event')
         )
     ):
         logger.info(
             f"campaign id {campaign_id} {campaign_data['campaign_name']}" +
             " conversion_event is incorrectly formatted "
-            f"as {campaign_info[0].get('conversion_event')}")
+            f"as {campaign_info.get('conversion_event')}")
         campaign_data['optimization_event'] = campaigns_conv_event_tuple_fix(
-            campaign_info[0].get('conversion_event'))
+            campaign_info.get('conversion_event'))
         logger.info(
             "will reformat db record to:" +
             f" {campaign_data['optimization_event']}"
@@ -287,7 +287,7 @@ def get_campaign(
         )
     else:
         campaign_data['optimization_event'] = (
-            campaign_info[0].get('conversion_event')
+            campaign_info.get('conversion_event')
         )
 
     if skip_extras:
