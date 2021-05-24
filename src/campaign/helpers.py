@@ -521,16 +521,6 @@ def notify(account_id, name, params):
     )
 
 
-def make_request(req, fields=[], params={}):
-    result = []
-    response = req(fields=fields, params=params, pending=True).execute()
-    for item in response:
-        if isinstance(response.params, list):
-            response.params = {}
-        result.append(item.export_all_data())
-    return result
-
-
 def start_async_task(task, params):
     task_id = str(uuid.uuid4())
     client.create_item('AsyncResult', task_id, {'task': task})

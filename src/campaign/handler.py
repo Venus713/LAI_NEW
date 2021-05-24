@@ -21,6 +21,7 @@ from utils.facebook import FacebookAPI
 from utils.batch import Batch
 from utils.event import get_promoted_object
 from utils.stripe import Stripe
+from utils.helpers import make_request
 from .helpers import (
     get_campaign,
     accounts_get_selectable_events,
@@ -32,7 +33,6 @@ from .helpers import (
     import_ad_helper,
     build_campaign_ownership_tree,
     notify,
-    make_request,
     start_async_task,
     update_campaign
 )
