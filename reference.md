@@ -640,3 +640,6 @@
     "Access-Token": "***"
 }
 ```
+
+## Ads apis
+1. get_account_ads_handler

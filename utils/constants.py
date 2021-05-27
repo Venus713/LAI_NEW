@@ -21,3 +21,19 @@ default_conversions = [
     'RATE',
     'ACHIEVEMENT_UNLOCKED'
 ]
+
+AD_FIELDS = [
+    'adlabels',
+    'bid_amount',
+    'bid_info',
+    'bid_type',
+    'conversion_specs',
+    'engagement_audience',
+    'is_autobid',
+    'priority',
+    'targeting',
+    'tracking_specs',
+    'audience_id',
+    'date_format',
+    'execution_options',
+]

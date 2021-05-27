@@ -24,3 +24,183 @@ import_ad:
         method: post
         cors:
           origin: '*'
+
+update_ad_status_from_campaign:
+  handler: src/ads/handler.update_ad_status_from_campaign_handler
+  events:
+    - http:
+        path: ads/ad_status_from_campaign
+        method: put
+        cors:
+          origin: '*'
+
+update_ad_status:
+  handler: src/ads/handler.update_ad_status_handler
+  events:
+    - http:
+        path: ads/ad_status
+        method: put
+        cors:
+          origin: '*'
+
+ads_remove_ad_from_campaign:
+  handler: src/ads/handler.ads_remove_ad_from_campaign_handler
+  events:
+    - http:
+        path: ads/remove_ad
+        method: delete
+        cors:
+          origin: '*'
+
+get_ad_account_info:
+  handler: src/ads/handler.get_ad_account_info_handler
+  events:
+    - http:
+        path: ads/ad_account
+        method: get
+        cors:
+          origin: '*'
+
+get_page_list:
+  handler: src/ads/handler.get_page_list_handler
+  events:
+    - http:
+        path: ads/page_list
+        method: get
+        cors:
+          origin: '*'
+
+get_lead_forms:
+  handler: src/ads/handler.get_lead_forms_handler
+  events:
+    - http:
+        path: ads/lead_forms
+        method: get
+        cors:
+          origin: '*'
+        
+get_account_ad_names:
+  handler: src/ads/handler.get_account_ad_names_handler
+  events:
+    - http:
+        path: ads/ad_names
+        method: get
+        cors:
+          origin: '*'
+
+get_insta_page_id:
+  handler: src/ads/handler.get_insta_page_id_handler
+  events:
+    - http:
+        path: ads/insta_page_id
+        method: get
+        cors:
+          origin: '*'
+
+fb_get_active_adsets:
+  handler: src/ads/handler.fb_get_active_adsets_handler
+  events:
+    - http:
+        path: ads/active_adsets
+        method: get
+        cors:
+          origin: '*'
+
+fb_create_single_image_ad:
+  handler: src/ads/handler.fb_create_single_image_ad_handler
+  events:
+    - http:
+        path: ads/single_image_ad
+        method: post
+        cors:
+          origin: '*'
+
+fb_create_video_ad:
+  handler: src/ads/handler.fb_create_video_ad_handler
+  events:
+    - http:
+        path: ads/video_ad
+        method: post
+        cors:
+          origin: '*'
+
+copy_unimported_ad:
+  handler: src/ads/handler.copy_unimported_ad_handler
+  events:
+    - http:
+        path: ads/copy_ad
+        method: post
+        cors:
+          origin: '*'
+
+fb_create_post_ad:
+  handler: src/ads/handler.fb_create_post_ad_handler
+  events:
+    - http:
+        path: ads/
+        method: post
+        cors:
+          origin: '*'
+
+fb_preview_single_image_ad:
+  handler: src/ads/handler.fb_preview_single_image_ad_handler
+  events:
+    - http:
+        path: ads/single_image_ad
+        method: get
+        cors:
+          origin: '*'
+
+fb_create_video_ad_preview:
+  handler: src/ads/handler.fb_create_video_ad_preview_handler
+  events:
+    - http:
+        path: ads/video_ad
+        method: get
+        cors:
+          origin: '*'
+
+fb_preview_copy_ad:
+  handler: src/ads/handler.fb_preview_copy_ad_handler
+  events:
+    - http:
+        path: ads/copy_ad
+        method: get
+        cors:
+          origin: '*'
+
+get_html_code_for_ad_preview_instagram:
+  handler: src/ads/handler.get_html_code_for_ad_preview_instagram_handler
+  events:
+    - http:
+        path: ads/html_code
+        method: get
+        cors:
+          origin: '*'
+
+fb_create_post_ad_preview:
+  handler: src/ads/handler.fb_create_post_ad_preview_handler
+  events:
+    - http:
+        path: ads
+        method: get
+        cors:
+          origin: '*'
+
+upload_video_ad:
+  handler: src/ads/handler.upload_video_ad_handler
+  events:
+    - http:
+        path: ads/upload_video_ad
+        method: post
+        cors:
+          origin: '*'
+
+fb_preview_single_image_ad_newsfeed:
+  handler: src/ads/handler.fb_preview_single_image_ad_newsfeed_handler
+  events:
+    - http:
+        path: ads/single_image_ad_newsfeed
+        method: get
+        cors:
+          origin: '*'
