@@ -94,17 +94,27 @@ class DynamoDb:
             ExpressionAttributeNames=expression_attr_name
         )
 
-    def delete_item(self, pk: str, sk: Any, attr: str, value: Any):
+    def delete_item(
+        self, pk: str, sk: Any, attr: str = None, value: Any = None
+    ):
         """
         delete an item
         """
-        return self.__table.update_item(
-            Key={
-                'pk': pk,
-                'sk': sk
-            },
-            ConditionExpression=f'SET {attr} = :val',
-            ExpressionAttributeValues={
-                ':val': value
-            }
-        )
+        if attr is None and value is None:
+            return self.__table.update_item(
+                Key={
+                    'pk': pk,
+                    'sk': sk
+                }
+            )
+        else:
+            return self.__table.update_item(
+                Key={
+                    'pk': pk,
+                    'sk': sk
+                },
+                ConditionExpression=f'SET {attr} = :val',
+                ExpressionAttributeValues={
+                    ':val': value
+                }
+            )

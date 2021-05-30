@@ -19,7 +19,7 @@
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/campaigns_check_async
-  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/ad_account_info
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/ad_account
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/run_auto_expansion
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/check_auto_expansion
   PUT - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/update_interests
@@ -31,20 +31,40 @@
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/selectable_events
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/account_pixels
-  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/page_list
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/page_list
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/account_mobile_apps
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/active_audiences
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/fb_make_lookalikes
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/fb_targeting_simple
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/import_campaign
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/auto_expand
-  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/lead_forms
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/lead_forms
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/adsets
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/ad_names
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/current_billing_plan
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/status
   PUT - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/status_db
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/campaings/edit_fields
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/account_ads
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/html_code_for_ad_preview
+  POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/import
+  PUT - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/ad_status_from_campaign
+  PUT - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/ad_status
+  DELETE - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/remove_ad
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/ad_names
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/insta_page_id
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/active_adsets
+  POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad
+  POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/video_ad
+  POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/copy_ad
+  POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/video_ad
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/copy_ad
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/html_code
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads
+  POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/upload_video_ad
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad_newsfeed
 
 ```
 ## functions:
@@ -94,4 +114,24 @@
   - update_campaign_status_db: lai-new-dev-update_campaign_status_db
   - edit_fields: lai-new-dev-edit_fields
   - execute_async_task: lai-new-dev-execute_async_task
+  - get_account_ads: lai-new-dev-get_account_ads
+  - get_html_code_for_ad_preview: lai-new-dev-get_html_code_for_ad_preview
+  - import_ad: lai-new-dev-import_ad
+  - update_ad_status_from_campaign: lai-new-dev-update_ad_status_from_campaign
+  - update_ad_status: lai-new-dev-update_ad_status
+  - ads_remove_ad_from_campaign: lai-new-dev-ads_remove_ad_from_campaign
+  - get_account_ad_names: lai-new-dev-get_account_ad_names
+  - get_insta_page_id: lai-new-dev-get_insta_page_id
+  - fb_get_active_adsets: lai-new-dev-fb_get_active_adsets
+  - fb_create_single_image_ad: lai-new-dev-fb_create_single_image_ad
+  - fb_create_video_ad: lai-new-dev-fb_create_video_ad
+  - copy_unimported_ad: lai-new-dev-copy_unimported_ad
+  - fb_create_post_ad: lai-new-dev-fb_create_post_ad
+  - fb_preview_single_image_ad: lai-new-dev-fb_preview_single_image_ad
+  - fb_create_video_ad_preview: lai-new-dev-fb_create_video_ad_preview
+  - fb_preview_copy_ad: lai-new-dev-fb_preview_copy_ad
+  - get_html_code_for_ad_preview_instagram: lai-new-dev-get_html_code_for_ad_preview_instagram
+  - fb_create_post_ad_preview: lai-new-dev-fb_create_post_ad_preview
+  - upload_video_ad: lai-new-dev-upload_video_ad
+  - fb_preview_single_image_ad_newsfeed: lai-new-dev-fb_preview_single_image_ad_newsfeed
 ```

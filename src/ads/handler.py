@@ -187,7 +187,7 @@ def get_html_code_for_ad_preview_handler(event, context):
 
 def import_ad_handler(event, context):
     '''
-    Lambda handler to import import_ad
+    Lambda handler for import_ad
     '''
     lambda_name = 'import_ad'
     logger.info(
@@ -549,11 +549,11 @@ def get_lead_forms_handler(event, context):
             logger.info(form)
             if 'name' in form:
                 leadgen_form_names.append((form['name'], form['id']))
-            return response.handler_response(
-                200,
-                leadgen_form_names,
-                'Success'
-            )
+        return response.handler_response(
+            200,
+            leadgen_form_names,
+            'Success'
+        )
 
     except Exception as e:
         logger.error(f'Raised Exception in get_lead_forms_handler: {e}')
@@ -603,7 +603,7 @@ def get_account_ad_names_handler(event, context):
         for ad in ad_list:
             if i % 500 == 0:
                 print(ad, i)
-            ad_list_by_adset[ad['adset_id']].append(ad['name'])
+            ad_list_by_adset[ad['id']].append(ad['name'])
             i += 1
 
         return response.handler_response(
@@ -686,10 +686,33 @@ def get_insta_page_id_handler(event, context):
                                 {'insta_id': insta_id},
                                 'Success'
                             )
+                        return response.handler_response(
+                            400,
+                            None,
+                            'Does not exist id in a insta_data.'
+                        )
+                    return response.handler_response(
+                        400,
+                        None,
+                        'data in a page_backed_instagram_accounts is empty.'
+                    )
+                return response.handler_response(
+                    400,
+                    None,
+                    'Doest not exist data in a page_backed_instagram_accounts.'
+                )
+            return response.handler_response(
+                400,
+                None,
+                (
+                    'Does not exist a page_backed_instagram_accounts'
+                    f' in {page}.'
+                )
+            )
         return response.handler_response(
             400,
             None,
-            'Failed'
+            'Does not exist the access_token in {page}'
         )
 
     except Exception as e:
@@ -1279,7 +1302,7 @@ def copy_unimported_ad_handler(event, context):
     ad = Ad(ad_id, api=api)
     ad.api_get(fields=['creative', 'name'])
     res, msg = add_ad_to_campaign(
-        fb_account_id, campaign_id, ad['creative']['id'], ad['name']
+        api, fb_account_id, campaign_id, ad['creative']['id'], ad['name']
     )
     if res:
         return response.handler_response(
