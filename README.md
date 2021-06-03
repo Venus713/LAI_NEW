@@ -65,6 +65,10 @@
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads
   POST - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/upload_video_ad
   GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad_newsfeed
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/fb_accounts
+  GET - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/fb_insights_actions_w_data
+  PUT - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/conversion_event
+  PUT - https://yfvlcj50xd.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/status
 
 ```
 ## functions:
@@ -134,4 +138,8 @@
   - fb_create_post_ad_preview: lai-new-dev-fb_create_post_ad_preview
   - upload_video_ad: lai-new-dev-upload_video_ad
   - fb_preview_single_image_ad_newsfeed: lai-new-dev-fb_preview_single_image_ad_newsfeed
+  - get_account_list: lai-new-dev-get_account_list
+  - get_fb_insights_actions_w_data: lai-new-dev-get_fb_insights_actions_w_data
+  - update_account_conversion_event: lai-new-dev-update_account_conversion_event
+  - update_account_status: lai-new-dev-update_account_status
 ```

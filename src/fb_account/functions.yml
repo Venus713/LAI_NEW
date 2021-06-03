@@ -1,0 +1,35 @@
+get_account_list:
+  handler: src/fb_account/handler.get_account_list_handler
+  events:
+    - http:
+        path: fb_accounts/
+        method: get
+        cors:
+          origin: '*'
+
+get_fb_insights_actions_w_data:
+  handler: src/fb_account/handler.get_fb_insights_actions_w_data_handler
+  events:
+    - http:
+        path: fb_accounts/fb_insights_actions_w_data
+        method: get
+        cors:
+          origin: '*'
+
+update_account_conversion_event:
+  handler: src/fb_account/handler.update_account_conversion_event_handler
+  events:
+    - http:
+        path: fb_accounts/conversion_event
+        method: put
+        cors:
+          origin: '*'
+
+update_account_status:
+  handler: src/fb_account/handler.update_account_status_handler
+  events:
+    - http:
+        path: fb_accounts/status
+        method: put
+        cors:
+          origin: '*'

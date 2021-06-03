@@ -73,6 +73,7 @@ functions:
   - ${file(src/auth/functions.yml)}
   - ${file(src/campaign/functions.yml)}
   - ${file(src/ads/functions.yml)}
+  - ${file(src/fb_account/functions.yml)}
 
 resources:
   - ${file(resources/api-gateway-errors.yml)}
