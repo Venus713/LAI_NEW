@@ -81,18 +81,18 @@ def get_fb_insights_actions_w_data_handler(event, context):
     fb_access_token = user_info.get('fb_access_token')
 
     body_required_field = (
-        'account_id', 'events_list'
+        'fb_account_id', 'events_list'
     )
     resp, res = event_parser.get_params(
         lambda_name, 'body', event, body_required_field)
     if res is False:
         return resp
-    account_id = resp.get('account_id')
+    fb_account_id = resp.get('fb_account_id')
     events_list = resp.get('events_list')
 
     fb_api.get_facebook_api(fb_access_token)
-    acc = AdAccount(f'act_{account_id}')
-    result = get_fb_insights_actions_w_data(account_id, acc, events_list)
+    acc = AdAccount(f'act_{fb_account_id}')
+    result = get_fb_insights_actions_w_data(fb_account_id, acc, events_list)
     return response.handler_response(
         200,
         result,
@@ -166,14 +166,16 @@ def update_account_status_handler(event, context):
 
     try:
         client.update_item(pk, fb_account_id + '-' + user_id, {
-            'status': status
+            'status': eval(status)
         })
 
-        if status is False:
+        if eval(status) is False:
             campaings = client.query_item('Campaign', {
                 'fb_account_id': fb_account_id
             })
             for campaign in campaings:
+                campaing_id = campaign.pop('sk')
+                campaign.pop('pk')
                 campaign['status'] = 'PAUSED'
                 campaign['auto_expand'] = False
                 campaign['ad_optimizer'] = False
@@ -181,7 +183,7 @@ def update_account_status_handler(event, context):
                 campaign['creative_optimization'] = False
                 client.update_item(
                     'Campaign',
-                    campaign['campaign_id'],
+                    campaing_id,
                     campaign
                 )
     except Exception as e:
@@ -189,7 +191,7 @@ def update_account_status_handler(event, context):
         return response.handler_response(
             400,
             None,
-            e['message']
+            'Raised an Exception'
         )
     return response.handler_response(
         200,

@@ -91,7 +91,8 @@ class DynamoDb:
             },
             UpdateExpression=f"SET {', '.join(update_expressions)}",
             ExpressionAttributeValues=expression_attr_values,
-            ExpressionAttributeNames=expression_attr_name
+            ExpressionAttributeNames=expression_attr_name,
+            ReturnValues='UPDATED_NEW'
         )
 
     def delete_item(
