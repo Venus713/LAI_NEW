@@ -1,0 +1,71 @@
+get_adset_data:
+  handler: src/dashboard/handler.get_adset_data_handler
+  events:
+    - http:
+        path: dashboard/adset_data
+        method: get
+        cors:
+          origin: '*'
+
+get_changelog:
+  handler: src/dashboard/handler.get_changelog_handler
+  events:
+    - http:
+        path: dashboard/changelog
+        method: get
+        cors:
+          origin: '*'
+
+get_notifications:
+  handler: src/dashboard/handler.get_notifications_handler
+  events:
+    - http:
+        path: dashboard/notifications
+        method: get
+        cors:
+          origin: '*'
+
+get_account_sidebar_and_dashboard_info:
+  handler: src/dashboard/handler.get_account_sidebar_and_dashboard_info_handler
+  events:
+    - http:
+        path: dashboard/info
+        method: get
+        cors:
+          origin: '*'
+
+get_fb_insights_for_campaign:
+  handler: src/dashboard/handler.get_fb_insights_for_campaign_handler
+  events:
+    - http:
+        path: dashboard/fb_insights_for_campaign
+        method: get
+        cors:
+          origin: '*'
+
+get_fb_insights_for_account:
+  handler: src/dashboard/handler.get_fb_insights_for_account_handler
+  events:
+    - http:
+        path: dashboard/fb_insights_for_account
+        method: get
+        cors:
+          origin: '*'
+
+get_available_billing_plans:
+  handler: src/dashboard/handler.get_available_billing_plans_handler
+  events:
+    - http:
+        path: dashboard/billing_plans
+        method: get
+        cors:
+          origin: '*'
+
+subscribe_to_plan:
+  handler: src/dashboard/handler.subscribe_to_plan_handler
+  events:
+    - http:
+        path: dashboard/subscribe_plan
+        method: post
+        cors:
+          origin: '*'

@@ -7,6 +7,9 @@
 - Ads
 - AsyncResult
 - FB_Exp_Interests
+- ChangeLog
+- Trigger
+
 
 
 # TEST

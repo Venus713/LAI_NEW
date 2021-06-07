@@ -1,3 +1,21 @@
+get_account_name_list:
+  handler: src/fb_account/handler.get_account_name_list_handler
+  events:
+    - http:
+        path: fb_accounts/name_list
+        method: get
+        cors:
+          origin: '*'
+
+add_all_fb_accounts:
+  handler: src/fb_account/handler.add_all_fb_accounts_handler
+  events:
+    - http:
+        path: fb_accounts/
+        method: post
+        cors:
+          origin: '*'
+
 get_account_list:
   handler: src/fb_account/handler.get_account_list_handler
   events:

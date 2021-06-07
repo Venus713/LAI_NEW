@@ -19,6 +19,104 @@ response: Response = Response()
 fb_api: FacebookAPI = FacebookAPI()
 
 
+def get_account_name_list_handler(event, context):
+    '''
+    Lambda handler to get account_name_list
+    '''
+    lambda_name = 'get_account_name_list'
+    logger.info(
+        'Received event in get_account_name_list: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+    body_required_field = (
+        'fb_access_token',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+    fb_access_token = resp.get('fb_access_token')
+
+    try:
+        account_name_list = fb_api.get_account_name_list(fb_access_token)
+        return response.handler_response(
+            200,
+            account_name_list,
+            'Success'
+        )
+    except Exception as e:
+        return response.handler_response(
+            400,
+            None,
+            f'Raised an Exception: {e}'
+        )
+
+
+def add_all_fb_accounts_handler(event, context):
+    '''
+    Lambda handler to add all_fb_accounts
+    '''
+    lambda_name = 'add_all_fb_accounts'
+    logger.info(
+        'Received event in add_all_fb_accounts: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+
+    body_required_field = (
+        'email', 'account_list', 'fb_access_token',
+    )
+    resp, res = event_parser.get_params(
+        lambda_name, 'body', event, body_required_field)
+    if res is False:
+        return resp
+    email = resp.get('email')
+    account_list = resp.get('account_list', [])
+    fb_access_token = resp.get('fb_access_token')
+    try:
+        for account in account_list:
+            account_id = int(account[1])
+            account_name = account[0]
+
+            account_name = account_name.replace("'", "")
+
+            client.create_item(
+                'FB_Account',
+                str(account_id) + '-' + str(user_id),
+                {
+                    'email': email,
+                    'fb_access_token': fb_access_token,
+                    'fb_page_id': '',
+                    'fb_instagram_id': '',
+                    'fb_pixel_id': '',
+                    'fb_app_id': '',
+                    'fb_account_id': account_id,
+                    'name': account_name,
+                    'account_type': 'facebook'
+                }
+            )
+            client.update_item('User', user_id, {
+                'credit_plan': None,
+                'spend_credits_left': 0
+            })
+        return response.handler_response(
+            200,
+            None,
+            'Success'
+        )
+    except Exception as e:
+        return response.handler_response(
+            400,
+            None,
+            f'Raised an Exception: {e}'
+        )
+
+
 def get_account_list_handler(event, context):
     '''
     Lambda handler to get account_list
