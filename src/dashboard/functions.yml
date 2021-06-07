@@ -29,7 +29,7 @@ get_account_sidebar_and_dashboard_info:
   handler: src/dashboard/handler.get_account_sidebar_and_dashboard_info_handler
   events:
     - http:
-        path: dashboard/info
+        path: dashboard
         method: get
         cors:
           origin: '*'
