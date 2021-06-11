@@ -1,6 +1,27 @@
 {
+  "name": "LAI_NEW",
+  "version": "1.0.0",
+  "description": "LAI_NEW BACKEND API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Venus713/LAI_NEW.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Venus713/LAI_NEW/issues"
+  },
+  "homepage": "https://github.com/Venus713/LAI_NEW#readme",
   "dependencies": {
-    "serverless-offline": "^6.9.0",
+    "serverless-plugin-split-stacks": "^1.11.0",
     "serverless-python-requirements": "^5.1.1"
+  },
+  "devDependencies": {
+    "serverless-offline": "^7.0.0"
   }
 }

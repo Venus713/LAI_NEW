@@ -45,10 +45,10 @@ Outputs:
     Value:
       Ref: CognitoUserPool
     Export:
-      Name: ${self:provider.stage}-UserPoolId
+      Name: ${self:custom.stage}-UserPoolId
 
   UserPoolClientId:
     Value:
       Ref: CognitoUserPoolClient
     Export:
-      Name: ${self:provider.stage}-UserPoolClientId
+      Name: ${self:custom.stage}-UserPoolClientId

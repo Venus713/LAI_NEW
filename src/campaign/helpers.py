@@ -907,7 +907,7 @@ def update_campaign(user_id, fb_account_id, campaign_id, fields):
                 raise Exception("Failed to update Facebook adsets")
 
             if errs and num_success == 0:
-                raise Exception("Failed to update Facebook adsets")            
+                raise Exception("Failed to update Facebook adsets")
 
     except Exception as e:
         logger.error(f"Something went wrong: {e}")
