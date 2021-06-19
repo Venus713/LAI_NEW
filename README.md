@@ -2,89 +2,87 @@
 
 ## endpoints:
 ```
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/signup
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/confirm-signup
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/confirm-fb
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/resend-verification-code
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/signin
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/signout
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/check-token
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/changepassword
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/forgotpassword
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/confirm-forgotpassword
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/users
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
-  PUT - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
-  DELETE - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/campaigns_check_async
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/ad_account
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/run_auto_expansion
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/check_auto_expansion
-  PUT - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/update_interests
-  DELETE - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/hide_campaign
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/accounts_get_custom_audiences
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/importable_from_api
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/expansion_interests
-  DELETE - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaigns/{id}
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/selectable_events
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/account_pixels
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/page_list
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/account_mobile_apps
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/active_audiences
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/fb_make_lookalikes
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/fb_targeting_simple
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/import_campaign
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/auto_expand
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/lead_forms
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/adsets
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/ad_names
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/current_billing_plan
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/status
-  PUT - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/status_db
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/campaings/edit_fields
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/account_ads
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/html_code_for_ad_preview
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/import
-  PUT - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/ad_status_from_campaign
-  PUT - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/ad_status
-  DELETE - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/remove_ad
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/ad_names
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/insta_page_id
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/active_adsets
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/video_ad
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/copy_ad
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/video_ad
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/copy_ad
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/html_code
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/upload_video_ad
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad_newsfeed
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/name_list
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/fb_accounts
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/fb_accounts
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/fb_insights_actions_w_data
-  PUT - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/conversion_event
-  PUT - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/status
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard/adset_data
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard/changelog
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard/notifications
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard/fb_insights_for_campaign
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard/fb_insights_for_account
-  GET - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard/billing_plans
-  POST - https://n6g1a2mbr3.execute-api.us-east-1.amazonaws.com/dev/dashboard/subscribe_plan
-
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/signup
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/confirm-signup
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/confirm-fb
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/resend-verification-code
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/signin
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/signout
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/check-token
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/changepassword
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/forgotpassword
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/confirm-forgotpassword
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
+  DELETE - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/campaigns_check_async
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/ad_account
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/run_auto_expansion
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/check_auto_expansion
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/update_interests
+  DELETE - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/hide_campaign
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/accounts_get_custom_audiences
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/importable_from_api
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/expansion_interests
+  DELETE - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaigns/{id}
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/selectable_events
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/account_pixels
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/page_list
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/account_mobile_apps
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/active_audiences
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/fb_make_lookalikes
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/fb_targeting_simple
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/import_campaign
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/auto_expand
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/lead_forms
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/adsets
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/ad_names
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/current_billing_plan
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/status
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/status_db
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/edit_fields
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/account_ads
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/html_code_for_ad_preview
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/import
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/ad_status_from_campaign
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/ad_status
+  DELETE - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/remove_ad
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/ad_names
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/insta_page_id
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/active_adsets
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/video_ad
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/copy_ad
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/video_ad
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/copy_ad
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/html_code
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/upload_video_ad
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/single_image_ad_newsfeed
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/name_list
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/fb_accounts
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/fb_accounts
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/fb_insights_actions_w_data
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/conversion_event
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/fb_accounts/status
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/adset_data
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/changelog
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/notifications
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/fb_insights_for_campaign
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/fb_insights_for_account
+  GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/billing_plans
+  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/subscribe_plan
 ```
 ## functions:
 ```
   - signup: lai-new-dev-signup
-  - custom_message: lai-new-dev-custom_message
   - confirm_signup: lai-new-dev-confirm_signup
   - confirm_facebook: lai-new-dev-confirm_facebook
   - resend_verification_code: lai-new-dev-resend_verification_code
@@ -161,5 +159,5 @@
   - get_fb_insights_for_campaign: lai-new-dev-get_fb_insights_for_campaign
   - get_fb_insights_for_account: lai-new-dev-get_fb_insights_for_account
   - get_available_billing_plans: lai-new-dev-get_available_billing_plans
-  subscribe_to_plan: lai-new-dev-subscribe_to_plan
-```
+  - subscribe_to_plan: lai-new-dev-subscribe_to_plan
+``- `

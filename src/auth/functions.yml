@@ -6,13 +6,13 @@ signup:
         method: post
         cors:
           origin: '*'
-custom_message:
-  handler: src/auth/handler.custom_message
-  events:
-    - cognitoUserPool:
-        pool: ${self:custom.userPoolName}
-        trigger: CustomMessage
-        existing: true
+# custom_message:
+#   handler: src/auth/handler.custom_message
+#   events:
+#     - cognitoUserPool:
+#         pool: ${self:custom.userPoolName}
+#         trigger: CustomMessage
+#         existing: true
 
 confirm_signup:
   handler: src/auth/handler.confirm_signup
