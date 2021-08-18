@@ -19,10 +19,9 @@ from utils.auth import Authentication
 from utils.response import Response
 from utils.facebook import FacebookAPI
 from utils.batch import Batch
-from utils.event import get_promoted_object
 from utils.stripe import Stripe
 from utils.helpers import make_request
-from .helpers import (
+from src.campaign.helpers import (
     get_campaign,
     accounts_get_selectable_events,
     get_account_pixels,
@@ -34,7 +33,8 @@ from .helpers import (
     build_campaign_ownership_tree,
     notify,
     start_async_task,
-    update_campaign
+    update_campaign,
+    get_promoted_object
 )
 
 pk = 'Campaign'
@@ -1569,17 +1569,12 @@ def campaign_list(event, context):
 
     user_info = client.get_item('User', user_id)
     fb_access_token = user_info.get('fb_access_token')
+    logger.info(
+        f'fb_access_token: {fb_access_token}')
 
-    body_required_field = (
-        'fb_account_id', 'campaign_id',
-    )
-    resp, res = event_parser.get_params(
-        lambda_name, 'body', event, body_required_field)
-    if res is False:
-        return resp
-
-    body = json.loads(event['body'])
-    fb_account_id = body.get('fb_account_id')
+    fb_account_id = event['queryStringParameters']['fb_account_id']
+    logger.info(
+        f'fb_account_id: {fb_account_id}')
 
     api = fb_api.get_facebook_api(fb_access_token)
 

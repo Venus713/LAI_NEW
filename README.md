@@ -1,5 +1,34 @@
 # LAI_NEW
 
+## Pre-requisite
+- Python3
+- Virtualenv
+
+## Install Package
+- `npm` package install
+```
+$ npm install
+```
+- `pip` install
+```
+$ pip install -r requirements.txt
+```
+
+## Run on local
+```
+$ sls offline start
+```
+
+## Invoke Local
+```
+$ sls invoke local --function functionName --path **/**.json
+```
+
+## Deploy
+```
+$ PROFILE=AndrewColl sls deploy
+```
+
 ## endpoints:
 ```
   POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/signup
@@ -16,7 +45,8 @@
   GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
   PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
   DELETE - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
-  POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}/disable
+  PUT - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/auth/users/{id}/enable
   POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings
   POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/campaings/campaigns_check_async
   GET - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/ads/ad_account
@@ -81,7 +111,7 @@
   POST - https://2h80rn6818.execute-api.us-east-1.amazonaws.com/dev/dashboard/subscribe_plan
 ```
 ## functions:
-```
+``- `
   - signup: lai-new-dev-signup
   - confirm_signup: lai-new-dev-confirm_signup
   - confirm_facebook: lai-new-dev-confirm_facebook
@@ -96,6 +126,7 @@
   - retrieve_user: lai-new-dev-retrieve_user
   - update_user: lai-new-dev-update_user
   - delete_user: lai-new-dev-delete_user
+  - disable_user: lai-new-dev-disable_user
   - enable_user: lai-new-dev-enable_user
   - create_campaign: lai-new-dev-create_campaign
   - campaigns_check_async: lai-new-dev-campaigns_check_async
@@ -160,4 +191,4 @@
   - get_fb_insights_for_account: lai-new-dev-get_fb_insights_for_account
   - get_available_billing_plans: lai-new-dev-get_available_billing_plans
   - subscribe_to_plan: lai-new-dev-subscribe_to_plan
-``- `
+```

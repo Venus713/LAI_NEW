@@ -131,11 +131,20 @@ delete_user:
         cors:
           origin: '*'
 
+disable_user:
+  handler: src/auth/handler.disable_user
+  events:
+    - http:
+        path: auth/users/{id}/disable
+        method: put
+        cors:
+          origin: '*'
+
 enable_user:
   handler: src/auth/handler.enable_user
   events:
     - http:
-        path: auth/users/{id}
-        method: post
+        path: auth/users/{id}/enable
+        method: put
         cors:
           origin: '*'

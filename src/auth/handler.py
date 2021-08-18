@@ -130,6 +130,7 @@ def confirm_facebook(event, context):
         return resp
     user_id = resp['user_id']
     fb_access_token = resp['fb_access_token']
+    logger.info(f'fb_access_token: {fb_access_token}')
 
     # ====== check if user_id deos exist in db ====== #
     user_info = client.get_item(pk, user_id)
@@ -216,7 +217,14 @@ def signin(event, context):
     usr_resp = client.query_item(pk, {'email': email})
     logger.info(f'query_item response in sign_in: {usr_resp}')
 
+    if not usr_resp:
+        return response.build_response(
+            400,
+            None,
+            'User does not exist.'
+        )
     signin_resp = cognito.sign_in(email, password, usr_resp[0])
+
     if signin_resp.get('statusCode') == 200:
         attr_body = {
             'last_modified_date': str(datetime.datetime.now())
@@ -493,6 +501,32 @@ def delete_user(event, context):
     handler for deleting a user
     '''
     lambda_name: str = 'user_delete'
+
+    logger.info(
+        'Received event in deleting a user: ' +
+        f'{json.dumps(event, indent=2)}')
+
+    auth_res, role, user_id = auth.get_auth(lambda_name, event)
+    if auth_res is False:
+        return response.auth_failed_response()
+    header_required_field = ('Access-Token',)
+    params, res = event_parser.get_params(
+        lambda_name, 'headers', event, header_required_field)
+    access_token = params['Access-Token']
+
+    delete_res = cognito.delete_user(user_id, access_token)
+    if delete_res.get('statusCode') == 200:
+        resp = client.delete_item(pk, user_id)
+        logger.info(f'response in deleting a user: {resp}')
+
+    return delete_res
+
+
+def disable_user(event, context):
+    '''
+    handler for disable a user
+    '''
+    lambda_name: str = 'user_disable'
 
     logger.info(
         'Received event in deleting a user: ' +

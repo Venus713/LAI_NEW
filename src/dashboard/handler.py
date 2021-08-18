@@ -12,7 +12,6 @@ from utils.auth import Authentication
 from utils.response import Response
 from utils.facebook import FacebookAPI
 from utils.stripe import Stripe
-from utils.helpers import get_available_billing_plans, get_customer
 
 from .helpers import get_active_fb_events, event_list_to_string
 
@@ -594,7 +593,7 @@ def get_available_billing_plans_handler(event, context):
     auth_res, role, user_id = auth.get_auth(lambda_name, event)
     if auth_res is False:
         return response.auth_failed_response()
-    plan_data = get_available_billing_plans()
+    plan_data = stripe.get_available_billing_plans()
     return response.handler_response(
         200,
         plan_data,
@@ -628,7 +627,7 @@ def subscribe_to_plan_handler(event, context):
     token = resp.get('token')
     plan = resp.get('plan')
 
-    customer = get_customer(email)
+    customer = stripe.get_customer(email)
     if customer:
         logger.info("customer already exists")
         if not customer['sources']['data']:

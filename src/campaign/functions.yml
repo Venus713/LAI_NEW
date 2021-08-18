@@ -97,7 +97,7 @@ delete_campaign:
         cors:
           origin: '*'
 
-campain_list:
+campaign_list:
   handler: src/campaign/handler.campaign_list
   events:
     - http:

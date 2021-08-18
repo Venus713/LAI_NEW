@@ -8,7 +8,7 @@ from utils.dynamodb import DynamoDb
 from utils.auth import Authentication
 from utils.response import Response
 from utils.facebook import FacebookAPI
-from .helpers import get_fb_insights_actions_w_data
+from src.fb_account.helpers import get_fb_insights_actions_w_data
 
 pk = 'FB_Account'
 

@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 import boto3
 
 from .logging import logger
@@ -33,7 +34,7 @@ class Cognito:
         )
         return resp
 
-    def sign_in(self, email: str, password: str, data: dict):
+    def sign_in(self, email: str, password: str, data: Dict):
         try:
             resp = self.initiate_auth(email, password)
         except self.__client.exceptions.NotAuthorizedException:
@@ -161,7 +162,7 @@ class Cognito:
             return self.response.exception_response(e), {}
         return self.response.signup_response(resp), resp
 
-    def confirm_sign_up(self, code: str, email: str) -> dict:
+    def confirm_sign_up(self, code: str, email: str) -> Dict:
         try:
             resp = self.__client.confirm_sign_up(
                 ClientId=self.__user_pool_client_id,
@@ -400,7 +401,7 @@ class Cognito:
         return self.response.build_response(
             200, None, 'Successfully password changed')
 
-    def global_signout(self, access_token: str) -> bool:
+    def global_signout(self, access_token: str) -> Dict:
         try:
             resp = self.__client.global_sign_out(
                 AccessToken=access_token
@@ -455,7 +456,7 @@ class Cognito:
         username = resp.get('Username', '')
         return self.response.build_response(200, username, '')
 
-    def admin_disable_user(self, username: str) -> bool:
+    def admin_disable_user(self, username: str) -> Dict:
         try:
             self.__client.admin_disable_user(
                 UserPoolId=self.__user_pool_id,
@@ -478,7 +479,7 @@ class Cognito:
         return self.response.build_response(
             200, {'user_id': username}, 'Successfully disabled')
 
-    def admin_enable_user(self, username: str) -> bool:
+    def admin_enable_user(self, username: str) -> Dict:
         try:
             self.__client.admin_enable_user(
                 UserPoolId=self.__user_pool_id,
@@ -500,3 +501,52 @@ class Cognito:
             return self.response.exception_response(e)
         return self.response.build_response(
             200, {'user_id': username}, 'Successfully enabled')
+
+    def admin_delete_user(self, username: str) -> Dict:
+        try:
+            self.__client.admin_delete_user(
+                UserPoolId=self.__user_pool_id,
+                Username=username
+            )
+        except self.__client.exceptions.ResourceNotFoundException:
+            return self.response.resource_not_found_exception_response()
+        except self.__client.exceptions.InvalidParameterException:
+            return self.response.invalid_parameter_exception_response()
+        except self.__client.exceptions.NotAuthorizedException:
+            return self.response.not_authorized_exception_response()
+        except self.__client.exceptions.TooManyRequestsException:
+            return self.response.too_many_requests_exception_response()
+        except self.__client.exceptions.UserNotFoundException:
+            return self.response.user_not_found_exception_response(username)
+        except self.__client.exceptions.InternalErrorException:
+            return self.response.internal_error_exception_response()
+        except Exception as e:
+            return self.response.exception_response(e)
+        return self.response.build_response(
+            200, {'user_id': username}, 'Successfully deleted')
+
+    def delete_user(self, user_id, access_token: str) -> Dict:
+        try:
+            self.__client.delete_user(
+                AccessToken=access_token
+            )
+        except self.__client.exceptions.ResourceNotFoundException:
+            return self.response.resource_not_found_exception_response()
+        except self.__client.exceptions.InvalidParameterException:
+            return self.response.invalid_parameter_exception_response()
+        except self.__client.exceptions.NotAuthorizedException:
+            return self.response.not_authorized_exception_response()
+        except self.__client.exceptions.TooManyRequestsException:
+            return self.response.too_many_requests_exception_response()
+        except self.__client.exceptions.PasswordResetRequiredException:
+            return self.response.password_reset_required_exception_response()
+        except self.__client.exceptions.UserNotConfirmedException:
+            return self.response.user_not_confirmed_exception_response(user_id)
+        except self.__client.exceptions.UserNotFoundException:
+            return self.response.user_not_found_exception_response(user_id)
+        except self.__client.exceptions.InternalErrorException:
+            return self.response.internal_error_exception_response()
+        except Exception as e:
+            return self.response.exception_response(e)
+        return self.response.build_response(
+            200, {'user_id': user_id}, 'Successfully deleted')
